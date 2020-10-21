@@ -2,7 +2,7 @@ all : index.html
 
 index.html : index.php
 	php index.php > $@
-	cp 	-f $@ br.html
+	cp 	-f $@ tp.html
 
 .PHONY: index.html
 
