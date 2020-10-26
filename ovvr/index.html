@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>TP</title>
+    <title>OVVR</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
@@ -154,15 +154,6 @@ void main(){
 
 <!-- ***************************************************************** -->
 <script id='comp' type='x-shader-fragment'>#version 300 es
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- * comp.frag    : Computational shader that marches the solution for the
- * TP model
- *
- * PROGRAMMER   : ABOUZAR KABOUDIAN
- * DATE         : Mon 26 Oct 2020 16:48:36 (EDT)
- * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
- *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- */
 
 precision highp float ;
 precision highp int ;
@@ -914,55 +905,97 @@ function loadWebGL(){
     env.fcolor2 = new Abubu.Float32Texture( env.width, env.height ) ;
     env.fcolor3 = new Abubu.Float32Texture( env.width, env.height ) ;
     env.fcolor4 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor5 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor6 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor7 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor8 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor9 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor10 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.fcolor11 = new Abubu.Float32Texture( env.width, env.height ) ;
 
     env.scolor0 = new Abubu.Float32Texture( env.width, env.height ) ;
     env.scolor1 = new Abubu.Float32Texture( env.width, env.height ) ;
     env.scolor2 = new Abubu.Float32Texture( env.width, env.height ) ;
     env.scolor3 = new Abubu.Float32Texture( env.width, env.height ) ;
     env.scolor4 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor5 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor6 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor7 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor8 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor9 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor10 = new Abubu.Float32Texture( env.width, env.height ) ;
+    env.scolor11 = new Abubu.Float32Texture( env.width, env.height ) ;
 
     env.fcolors = 
         [   env.fcolor0, 
             env.fcolor1, 
             env.fcolor2, 
             env.fcolor3, 
-            env.fcolor4 ] ;
+            env.fcolor4,
+            env.fcolor5, 
+            env.fcolor6, 
+            env.fcolor7, 
+            env.fcolor8,         
+            env.fcolor9, 
+            env.fcolor10,
+            env.fcolor11,
+        ] ;
+
     env.scolors = 
         [   env.scolor0, 
             env.scolor1, 
             env.scolor2, 
             env.scolor3, 
-            env.scolor4 ] ;
+            env.scolor4,
+            env.scolor5, 
+            env.scolor6, 
+            env.scolor7, 
+            env.scolor8,         
+            env.scolor9, 
+            env.scolor10,
+            env.scolor11,
+    ] ;
 
     env.colors = [ ...env.fcolors, ...env.scolors ] ;
     for(var i=0; i< env.colors.length ; i++){
         env.colors[i].pairable = true ;
     }
 
-    function TpTargets( colors ){
-        this.ocolor0 = { location : 0 , target : colors[0] } ;
-        this.ocolor1 = { location : 1 , target : colors[1] } ;
-        this.ocolor2 = { location : 2 , target : colors[2] } ;
-        this.ocolor3 = { location : 3 , target : colors[3] } ;
-        this.ocolor4 = { location : 4 , target : colors[4] } ;
+    function OvTargets1( colors ){
+        this.ocolor0    = { location : 0 , target : colors[0] } ;
+        this.ocolor1    = { location : 1 , target : colors[1] } ;
+        this.ocolor2    = { location : 2 , target : colors[2] } ;
+        this.ocolor3    = { location : 3 , target : colors[3] } ;
+        this.ocolor4    = { location : 4 , target : colors[4] } ;
+        this.ocolor5    = { location : 5 , target : colors[5] } ;
+        this.ocolor6    = { location : 6 , target : colors[6] } ;
+        this.ocolor7    = { location : 7 , target : colors[7] } ;
     }
+    function OvTargets2( colors ){
+        this.ocolor8    = { location : 0 , target : colors[8] } ;
+        this.ocolor9    = { location : 1 , target : colors[9] } ;
+        this.ocolor10   = { location : 2 , target : colors[10] } ;
+        this.ocolor11   = { location : 3 , target : colors[11] } ;
+    }
+
+
 /*------------------------------------------------------------------------
  * Initial conditions  
  *------------------------------------------------------------------------
  */
-    env.finit = new Abubu.Solver({
-        fragmentShader : source('init') ,
-        targets : new TpTargets( env.fcolors ) , 
-    } ) ;
-    env.sinit = new Abubu.Solver({
-        fragmentShader : source('init') ,
-        targets : new TpTargets( env.scolors ) ,
-    } ) ;
+//    env.finit = new Abubu.Solver({
+//        fragmentShader : source('init') ,
+//        targets : new TpTargets( env.fcolors ) , 
+//    } ) ;
+//    env.sinit = new Abubu.Solver({
+//        fragmentShader : source('init') ,
+//        targets : new TpTargets( env.scolors ) ,
+//    } ) ;
 
     // function to initialize solution ...................................
     env.initialize = function(){
-        env.finit.run() ;
-        env.sinit.run() ;
+//        env.finit.run() ;
+//        env.sinit.run() ;
 
         env.splot.init() ;
         env.vsgn.init(0) ;
@@ -975,80 +1008,80 @@ function loadWebGL(){
  * marching steps 
  *------------------------------------------------------------------------
  */
-    env.ds_x        =   12 ;
-    env.ds_y        =   12 ;
-    env.C_Na        =   1.0 ;
-    env.C_NaCa      =   1.0 ;
-    env.C_to        =   1.0 ;
-    env.C_CaL       =   1.0 ;
-    env.C_Kr        =   1.0 ;
-    env.C_Ks        =   1.0 ;
-    env.C_K1        =   1.0 ;
-    env.C_NaK       =   1.0 ;
-    env.C_bNa       =   1.0 ;
-    env.C_pK        =   1.0 ;
-    env.C_bCa       =   1.0 ;
-    env.C_pCa       =   1.0 ;
-    env.C_leak      =   1.0 ;
-    env.C_up        =   1.0 ;
-    env.C_rel       =   1.0 ;
-    env.C_xfer      =   1.0 ;
-    env.dt          = 0.05 ;
-    env.capacitance = 0.185,
-    env.C_m         = 1.0 ;
-    env.diffCoef    = 0.001 ;
-    env.cellType    = 0 ; // mid : 0, epi:1, endo :2 
-
-    // uniforms to be sent to the two marching solvers
-    var compUniforms = function(_cs){
-        this.icolor0    = { type : 't', value : _cs[0]          } ;
-        this.icolor1    = { type : 't', value : _cs[1]          } ;
-        this.icolor2    = { type : 't', value : _cs[2]          } ;
-        this.icolor3    = { type : 't', value : _cs[3]          } ;
-        this.icolor4    = { type : 't', value : _cs[4]          } ;
-        this.ds_x       = { type : 'f', value : env.ds_x        } ;
-        this.ds_y       = { type : 'f', value : env.ds_y        } ;
-        this.C_Na       = { type : 'f', value : env.C_Na        } ;
-        this.C_NaCa     = { type : 'f', value : env.C_NaCa      } ;
-        this.C_to       = { type : 'f', value : env.C_to        } ;
-        this.C_CaL      = { type : 'f', value : env.C_CaL       } ;
-        this.C_Kr       = { type : 'f', value : env.C_Kr        } ;
-        this.C_Ks       = { type : 'f', value : env.C_Ks        } ;
-        this.C_K1       = { type : 'f', value : env.C_K1        } ;
-        this.C_NaK      = { type : 'f', value : env.C_NaK       } ;
-        this.C_bNa      = { type : 'f', value : env.C_bNa       } ;
-        this.C_pK       = { type : 'f', value : env.C_pK        } ;
-        this.C_bCa      = { type : 'f', value : env.C_bCa       } ;
-        this.C_pCa      = { type : 'f', value : env.C_pCa       } ;
-        this.C_leak     = { type : 'f', value : env.C_leak      } ;
-        this.C_up       = { type : 'f', value : env.C_up        } ;
-        this.C_rel      = { type : 'f', value : env.C_rel       } ;
-        this.C_xfer     = { type : 'f', value : env.C_xfer      } ;
-        this.dt         = { type : 'f', value : env.dt          } ;
-        this.capacitance= { type : 'f', value : env.capacitance } ;
-        this.C_m        = { type : 'f', value : env.C_m         } ;
-        this.diffCoef   = { type : 'f', value : env.diffCoef    } ;
-        this.cellType   = { type : 'i', value : env.cellType    } ;
-    } ;
-
-    // reads fcolors and writes scolors ..................................
-    env.fcomp = new Abubu.Solver({
-        fragmentShader : source('comp') ,
-        uniforms : new compUniforms( env.fcolors ) ,
-        targets : new TpTargets( env.scolors ) ,
-    } ) ;
-
-    // reads scolors and writes fcolors ..................................
-    env.scomp = new Abubu.Solver({
-        fragmentShader : source('comp') ,
-        uniforms : new compUniforms( env.scolors ) ,
-        targets : new TpTargets( env.fcolors ) ,
-    } ) ;
+//    env.ds_x        =   12 ;
+//    env.ds_y        =   12 ;
+//    env.C_Na        =   1.0 ;
+//    env.C_NaCa      =   1.0 ;
+//    env.C_to        =   1.0 ;
+//    env.C_CaL       =   1.0 ;
+//    env.C_Kr        =   1.0 ;
+//    env.C_Ks        =   1.0 ;
+//    env.C_K1        =   1.0 ;
+//    env.C_NaK       =   1.0 ;
+//    env.C_bNa       =   1.0 ;
+//    env.C_pK        =   1.0 ;
+//    env.C_bCa       =   1.0 ;
+//    env.C_pCa       =   1.0 ;
+//    env.C_leak      =   1.0 ;
+//    env.C_up        =   1.0 ;
+//    env.C_rel       =   1.0 ;
+//    env.C_xfer      =   1.0 ;
+//    env.dt          = 0.05 ;
+//    env.capacitance = 0.185,
+//    env.C_m         = 1.0 ;
+//    env.diffCoef    = 0.001 ;
+//    env.cellType    = 0 ; // mid : 0, epi:1, endo :2 
+//
+//    // uniforms to be sent to the two marching solvers
+//    var compUniforms = function(_cs){
+//        this.icolor0    = { type : 't', value : _cs[0]          } ;
+//        this.icolor1    = { type : 't', value : _cs[1]          } ;
+//        this.icolor2    = { type : 't', value : _cs[2]          } ;
+//        this.icolor3    = { type : 't', value : _cs[3]          } ;
+//        this.icolor4    = { type : 't', value : _cs[4]          } ;
+//        this.ds_x       = { type : 'f', value : env.ds_x        } ;
+//        this.ds_y       = { type : 'f', value : env.ds_y        } ;
+//        this.C_Na       = { type : 'f', value : env.C_Na        } ;
+//        this.C_NaCa     = { type : 'f', value : env.C_NaCa      } ;
+//        this.C_to       = { type : 'f', value : env.C_to        } ;
+//        this.C_CaL      = { type : 'f', value : env.C_CaL       } ;
+//        this.C_Kr       = { type : 'f', value : env.C_Kr        } ;
+//        this.C_Ks       = { type : 'f', value : env.C_Ks        } ;
+//        this.C_K1       = { type : 'f', value : env.C_K1        } ;
+//        this.C_NaK      = { type : 'f', value : env.C_NaK       } ;
+//        this.C_bNa      = { type : 'f', value : env.C_bNa       } ;
+//        this.C_pK       = { type : 'f', value : env.C_pK        } ;
+//        this.C_bCa      = { type : 'f', value : env.C_bCa       } ;
+//        this.C_pCa      = { type : 'f', value : env.C_pCa       } ;
+//        this.C_leak     = { type : 'f', value : env.C_leak      } ;
+//        this.C_up       = { type : 'f', value : env.C_up        } ;
+//        this.C_rel      = { type : 'f', value : env.C_rel       } ;
+//        this.C_xfer     = { type : 'f', value : env.C_xfer      } ;
+//        this.dt         = { type : 'f', value : env.dt          } ;
+//        this.capacitance= { type : 'f', value : env.capacitance } ;
+//        this.C_m        = { type : 'f', value : env.C_m         } ;
+//        this.diffCoef   = { type : 'f', value : env.diffCoef    } ;
+//        this.cellType   = { type : 'i', value : env.cellType    } ;
+//    } ;
+//
+//    // reads fcolors and writes scolors ..................................
+//    env.fcomp = new Abubu.Solver({
+//        fragmentShader : source('comp') ,
+//        uniforms : new compUniforms( env.fcolors ) ,
+//        targets : new TpTargets( env.scolors ) ,
+//    } ) ;
+//
+//    // reads scolors and writes fcolors ..................................
+//    env.scomp = new Abubu.Solver({
+//        fragmentShader : source('comp') ,
+//        uniforms : new compUniforms( env.scolors ) ,
+//        targets : new TpTargets( env.fcolors ) ,
+//    } ) ;
 
     // marches the solution for two time steps ...........................
     env.march = function(){
-        env.fcomp.render() ;
-        env.scomp.render() ;
+        //env.fcomp.render() ;
+        //env.scomp.render() ;
         env.time += 2.*env.dt ;
     } ;
 
@@ -1387,7 +1420,7 @@ function createGui(){
 <!-- body of the html page                                             -->
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 <body onload='loadWebGL();'>
-    <h1>The TP Model</h1>
+    <h1>The OVVR Model</h1>
     <canvas id='canvas_1' width=512 height=512>
         Your browser does not support HTML4.0 canvas elements.
     </canvas>

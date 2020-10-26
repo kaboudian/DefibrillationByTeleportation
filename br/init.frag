@@ -13,15 +13,7 @@ layout (location = 3) out vec4 scolor2 ;
 
 
 // macros to assign color channels to physical variable ..................
-#define V       color1.r
-#define Cai     color1.g
-#define x1      color1.b
-#define f       color1.a
-
-#define m       color2.r
-#define h       color2.g
-#define j       color2.b
-#define d       color2.a
+#include    variables.glsl
 
 /*========================================================================
  * main body of the shader
@@ -38,7 +30,6 @@ void main(){
     Cai = 1.782e-7 ;
     x1  = 0.0057 ;
     f   = 1.0 ;
-
 
     if ( cc.x < 0.02 ){
         V = 0. ;

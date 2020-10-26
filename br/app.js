@@ -201,9 +201,11 @@ function loadWebGL(){
     // function to initialize solution ...................................
     env.initialize = function(){
         env.init.run() ;
+         env.splot.init() ;
+        env.vsgn.init(0) ;
+        env.osgn.init(0) ;
         env.time = 0. ;
     }
-    env.initialize() ;
 
     // compute solvers ...................................................
     env.dt = 0.05 ;
@@ -290,7 +292,7 @@ function loadWebGL(){
     env.defib = {} ;
     env.thickness  = 0.05 ;
     env.uThreshold = -20 ;
-    env.vThreshold = 0.8 ;
+    env.vThreshold = 0.45 ;
 
     env.defib_s1 = new Abubu.Solver({
         fragmentShader : source('defib') ,
@@ -491,6 +493,8 @@ function loadWebGL(){
     }
 
     createGui() ;
+
+    env.initialize() ;
     env.run() ;
 }
 

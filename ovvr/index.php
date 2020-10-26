@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>TP</title>
+    <title>OVVR</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
@@ -40,7 +40,7 @@
 <!-- body of the html page                                             -->
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 <body onload='loadWebGL();'>
-    <h1>The TP Model</h1>
+    <h1>The OVVR Model</h1>
     <canvas id='canvas_1' width=512 height=512>
         Your browser does not support HTML4.0 canvas elements.
     </canvas>

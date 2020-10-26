@@ -1,13 +1,4 @@
 #version 300 es
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- * comp.frag    : Computational shader that marches the solution for the
- * TP model
- *
- * PROGRAMMER   : ABOUZAR KABOUDIAN
- * DATE         : Mon 26 Oct 2020 16:48:36 (EDT)
- * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
- *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- */
 
 precision highp float ;
 precision highp int ;
