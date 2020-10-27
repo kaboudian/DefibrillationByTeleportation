@@ -20,11 +20,13 @@
 <?php
     include "shader.php" ;
 
-    shader('init') ;
-    shader('comp') ;
-    shader('click') ;
-    shader('display') ;
-    shader('defib') ;
+    shader( 'init1'     ) ;
+    shader( 'init2'     ) ;
+    shader( 'comp1'     ) ;
+    shader( 'comp2'     ) ;
+    shader( 'click'     ) ;
+    shader( 'display'   ) ;
+    shader( 'defib'     ) ;
 ?>
 
 

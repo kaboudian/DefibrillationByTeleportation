@@ -20,102 +20,72 @@ function loadWebGL(){
  * creating textures for time stepping 
  *------------------------------------------------------------------------
  */
-    env.fcolor0 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor1 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor2 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor3 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor4 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor5 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor6 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor7 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor8 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor9 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor10 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.fcolor11 = new Abubu.Float32Texture( env.width, env.height ) ;
-
-    env.scolor0 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor1 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor2 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor3 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor4 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor5 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor6 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor7 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor8 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor9 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor10 = new Abubu.Float32Texture( env.width, env.height ) ;
-    env.scolor11 = new Abubu.Float32Texture( env.width, env.height ) ;
-
-    env.fcolors = 
-        [   env.fcolor0, 
-            env.fcolor1, 
-            env.fcolor2, 
-            env.fcolor3, 
-            env.fcolor4,
-            env.fcolor5, 
-            env.fcolor6, 
-            env.fcolor7, 
-            env.fcolor8,         
-            env.fcolor9, 
-            env.fcolor10,
-            env.fcolor11,
-        ] ;
-
-    env.scolors = 
-        [   env.scolor0, 
-            env.scolor1, 
-            env.scolor2, 
-            env.scolor3, 
-            env.scolor4,
-            env.scolor5, 
-            env.scolor6, 
-            env.scolor7, 
-            env.scolor8,         
-            env.scolor9, 
-            env.scolor10,
-            env.scolor11,
-    ] ;
-
+    env.fcolors = [] ;
+    env.scolors = [] ;
+    for(var i=0; i<12; i++){
+        env['fcolor'+i] = new Abubu.Float32Texture( 
+                env.width, env.height, { pairable : true } ) ;
+        env['scolor'+i] = new Abubu.Float32Texture( 
+                env.width, env.height, { pairable : true } ) ;
+        env.fcolors.push(env['fcolor'+i]) ;
+        env.scolors.push(env['scolor'+i]) ;
+    }
     env.colors = [ ...env.fcolors, ...env.scolors ] ;
     for(var i=0; i< env.colors.length ; i++){
         env.colors[i].pairable = true ;
     }
 
-    function OvTargets1( colors ){
+    function OvvrTargets1( colors ){
         this.ocolor0    = { location : 0 , target : colors[0] } ;
         this.ocolor1    = { location : 1 , target : colors[1] } ;
         this.ocolor2    = { location : 2 , target : colors[2] } ;
         this.ocolor3    = { location : 3 , target : colors[3] } ;
-        this.ocolor4    = { location : 4 , target : colors[4] } ;
-        this.ocolor5    = { location : 5 , target : colors[5] } ;
-        this.ocolor6    = { location : 6 , target : colors[6] } ;
-        this.ocolor7    = { location : 7 , target : colors[7] } ;
-    }
-    function OvTargets2( colors ){
-        this.ocolor8    = { location : 0 , target : colors[8] } ;
-        this.ocolor9    = { location : 1 , target : colors[9] } ;
-        this.ocolor10   = { location : 2 , target : colors[10] } ;
-        this.ocolor11   = { location : 3 , target : colors[11] } ;
     }
 
+    function OvvrTargets2( colors ){
+        this.ocolor4    = { location : 0 , target : colors[4] } ;
+        this.ocolor5    = { location : 1 , target : colors[5] } ;
+        this.ocolor6    = { location : 2 , target : colors[6] } ;
+        this.ocolor7    = { location : 3 , target : colors[7] } ;
+        this.ocolor8    = { location : 4 , target : colors[8] } ;
+        this.ocolor9    = { location : 5 , target : colors[9] } ;
+        this.ocolor10   = { location : 6 , target : colors[10] } ;
+        this.ocolor11   = { location : 7 , target : colors[11] } ;
+    }
 
 /*------------------------------------------------------------------------
  * Initial conditions  
  *------------------------------------------------------------------------
  */
-//    env.finit = new Abubu.Solver({
-//        fragmentShader : source('init') ,
-//        targets : new TpTargets( env.fcolors ) , 
-//    } ) ;
-//    env.sinit = new Abubu.Solver({
-//        fragmentShader : source('init') ,
-//        targets : new TpTargets( env.scolors ) ,
-//    } ) ;
+    // init sets 0 to 3 ..................................................
+    env.finit1 = new Abubu.Solver({
+        fragmentShader : source( 'init1' ) ,
+        targets : new OvvrTargets1( env.fcolors ) ,
+    } ) ;
+    env.sinit1 = new Abubu.Solver({
+        fragmentShader : source( 'init1' ) ,
+        targets : new OvvrTargets1( env.scolors ) ,
+    } ) ;
+
+    // init sets 4 to 11 .................................................
+    env.finit2 = new Abubu.Solver({
+        fragmentShader : source( 'init2' ) ,
+        targets : new OvvrTargets2( env.fcolors ) ,
+    } ) ;
+    env.sinit2 = new Abubu.Solver({
+        fragmentShader : source( 'init2' ) ,
+        targets : new OvvrTargets2( env.scolors ) ,
+    } ) ;
+
 
     // function to initialize solution ...................................
     env.initialize = function(){
-//        env.finit.run() ;
-//        env.sinit.run() ;
+        env.finit1.run() ;
+        env.sinit1.run() ;
+        
+        env.finit2.run() ;
+        env.sinit2.run() ;
+
 
         env.splot.init() ;
         env.vsgn.init(0) ;
@@ -128,61 +98,6 @@ function loadWebGL(){
  * marching steps 
  *------------------------------------------------------------------------
  */
-//    env.ds_x        =   12 ;
-//    env.ds_y        =   12 ;
-//    env.C_Na        =   1.0 ;
-//    env.C_NaCa      =   1.0 ;
-//    env.C_to        =   1.0 ;
-//    env.C_CaL       =   1.0 ;
-//    env.C_Kr        =   1.0 ;
-//    env.C_Ks        =   1.0 ;
-//    env.C_K1        =   1.0 ;
-//    env.C_NaK       =   1.0 ;
-//    env.C_bNa       =   1.0 ;
-//    env.C_pK        =   1.0 ;
-//    env.C_bCa       =   1.0 ;
-//    env.C_pCa       =   1.0 ;
-//    env.C_leak      =   1.0 ;
-//    env.C_up        =   1.0 ;
-//    env.C_rel       =   1.0 ;
-//    env.C_xfer      =   1.0 ;
-//    env.dt          = 0.05 ;
-//    env.capacitance = 0.185,
-//    env.C_m         = 1.0 ;
-//    env.diffCoef    = 0.001 ;
-//    env.cellType    = 0 ; // mid : 0, epi:1, endo :2 
-//
-//    // uniforms to be sent to the two marching solvers
-//    var compUniforms = function(_cs){
-//        this.icolor0    = { type : 't', value : _cs[0]          } ;
-//        this.icolor1    = { type : 't', value : _cs[1]          } ;
-//        this.icolor2    = { type : 't', value : _cs[2]          } ;
-//        this.icolor3    = { type : 't', value : _cs[3]          } ;
-//        this.icolor4    = { type : 't', value : _cs[4]          } ;
-//        this.ds_x       = { type : 'f', value : env.ds_x        } ;
-//        this.ds_y       = { type : 'f', value : env.ds_y        } ;
-//        this.C_Na       = { type : 'f', value : env.C_Na        } ;
-//        this.C_NaCa     = { type : 'f', value : env.C_NaCa      } ;
-//        this.C_to       = { type : 'f', value : env.C_to        } ;
-//        this.C_CaL      = { type : 'f', value : env.C_CaL       } ;
-//        this.C_Kr       = { type : 'f', value : env.C_Kr        } ;
-//        this.C_Ks       = { type : 'f', value : env.C_Ks        } ;
-//        this.C_K1       = { type : 'f', value : env.C_K1        } ;
-//        this.C_NaK      = { type : 'f', value : env.C_NaK       } ;
-//        this.C_bNa      = { type : 'f', value : env.C_bNa       } ;
-//        this.C_pK       = { type : 'f', value : env.C_pK        } ;
-//        this.C_bCa      = { type : 'f', value : env.C_bCa       } ;
-//        this.C_pCa      = { type : 'f', value : env.C_pCa       } ;
-//        this.C_leak     = { type : 'f', value : env.C_leak      } ;
-//        this.C_up       = { type : 'f', value : env.C_up        } ;
-//        this.C_rel      = { type : 'f', value : env.C_rel       } ;
-//        this.C_xfer     = { type : 'f', value : env.C_xfer      } ;
-//        this.dt         = { type : 'f', value : env.dt          } ;
-//        this.capacitance= { type : 'f', value : env.capacitance } ;
-//        this.C_m        = { type : 'f', value : env.C_m         } ;
-//        this.diffCoef   = { type : 'f', value : env.diffCoef    } ;
-//        this.cellType   = { type : 'i', value : env.cellType    } ;
-//    } ;
 //
 //    // reads fcolors and writes scolors ..................................
 //    env.fcomp = new Abubu.Solver({
@@ -212,7 +127,7 @@ function loadWebGL(){
     var click = new Abubu.Solver({
         fragmentShader : source( 'click' ) ,
         uniforms : {
-            inTexture       : { type : 't', value  : env.fcolor0    } ,
+            inTexture       : { type : 't', value  : env.fcolor4    } ,
             clickRadius     : { type : 'f', value  : 0.1            } ,
             clickPosition   : { type : 'v2', value : [0.5,0.5]      } ,
         } ,
@@ -221,7 +136,7 @@ function loadWebGL(){
         }
     } ) ;
     
-    var clickCopy = new Abubu.Copy( env.scolor1, env.fcolor0 ) ;
+    var clickCopy = new Abubu.Copy( env.scolor1, env.fcolor4 ) ;
     
     var mouseDrag_1 = new Abubu.MouseListener({
         canvas : document.getElementById('canvas_1') ,
@@ -255,18 +170,18 @@ function loadWebGL(){
     env.defib_s1 = new Abubu.Solver({
         fragmentShader : source('defib') ,
         uniforms :{
-            inColor : { type : 's', value : env.fcolor0, 
+            inColor : { type : 's', value : env.fcolor4, 
                         magFilter: 'linear' } ,
             thickness  : { type : 'f', value : env.thickness   } ,
             uThreshold : { type : 'f', value : env.uThreshold  } ,
             vThreshold : { type : 'f', value : env.vThreshold  } ,
         } ,
         targets : {
-            ocolor : { location : 0 , target : env.scolor0 } ,
+            ocolor : { location : 0 , target : env.scolor4 } ,
         }
     } ) ;
     
-    env.defib_s2 = new Abubu.Copy(env.scolor0, env.fcolor0) ;
+    env.defib_s2 = new Abubu.Copy(env.scolor4, env.fcolor4) ;
     env.defibrillate = function(){
         env.defib_s1.render() ;
         env.defib_s2.render() ;
@@ -374,7 +289,7 @@ function loadWebGL(){
  */
     // voltage plot ------------------------------------------------------
     env.vplot = new Abubu.Plot2D({
-        target : env.fcolor0 ,
+        target : env.fcolor4 ,
         channel: 'r' ,
         minValue : -90 ,
         maxValue : 30 ,
@@ -387,7 +302,7 @@ function loadWebGL(){
     env.tplot = new Abubu.Solver({
         fragmentShader : source("display") ,
         uniforms : {
-            inColor : { type : 't', value : env.fcolor0 } ,
+            inColor : { type : 't', value : env.fcolor4 } ,
             thickness  : { type : 'f', value : env.thickness   } ,
             uThreshold : { type : 'f', value : env.uThreshold  } ,
             vThreshold : { type : 'f', value : env.vThreshold  } ,
@@ -408,7 +323,7 @@ function loadWebGL(){
         canvas : document.getElementById('canvas_2') 
     } ) ;
 
-    env.osgn = env.splot.addSignal( env.fcolor0, {
+    env.osgn = env.splot.addSignal( env.fcolor4, {
             channel : 'g',
             minValue : -.1,
             maxValue : 1.1 ,
@@ -420,7 +335,7 @@ function loadWebGL(){
     } ) ;
 
     // voltage signal ....................................................
-    env.vsgn = env.splot.addSignal( env.fcolor0, {
+    env.vsgn = env.splot.addSignal( env.fcolor4, {
             channel : 'r',
             minValue : -90,
             maxValue : 30 ,

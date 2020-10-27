@@ -35,11 +35,19 @@ function getShader( $file ){
 
         /* if the first word of the line is #include load the included
            file, otherwise, append the line as is */
-        if ( $lineArray[0] == "#include" ){
-            $output = $output . getShader( $lineArray[1] ) ;
-        }else{
+        $noWords=count($lineArray) ;
+        $noInclude=true ;
+        for($j=0 ; $j<$noWords; $j++){
+            if ( $lineArray[$j] == "#include" ){
+                $noInclude=false ;
+                $output = $output . getShader( $lineArray[$j+1] ) ;
+                break ;
+            }
+        }
+        if ($noInclude){
             $output = $output . $arr[$i] . "\n" ;
         }
+
     }
     return $output ;
 }
