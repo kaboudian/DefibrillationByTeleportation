@@ -19,6 +19,7 @@
 #define xs2         color3.b
 
 #define vlt         color4.r
+#define V           color4.r
 #define v           color4.g
 #define xK1         color4.b
 #define CaMKtrap    color4.a

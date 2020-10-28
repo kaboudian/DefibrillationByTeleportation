@@ -77,7 +77,6 @@ function loadWebGL(){
         targets : new OvvrTargets2( env.scolors ) ,
     } ) ;
 
-
     // function to initialize solution ...................................
     env.initialize = function(){
         env.finit1.run() ;
@@ -98,6 +97,10 @@ function loadWebGL(){
  * marching steps 
  *------------------------------------------------------------------------
  */
+    env.fcomp1 = new Abubu.Solver({
+        fragmentShader : source('comp1') ,
+        targets : new OvvrTargets1( env.scolors ) ,
+    } ) ;
 //
 //    // reads fcolors and writes scolors ..................................
 //    env.fcomp = new Abubu.Solver({

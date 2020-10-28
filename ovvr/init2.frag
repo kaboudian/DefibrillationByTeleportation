@@ -1,7 +1,16 @@
 #version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * init2.frag   : initialize color-set 4 to 11
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Tue 27 Oct 2020 18:52:14 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
 
 #include precision.glsl
 
+// interface variables ...................................................
 in vec2 cc ;
 
 // variable macro ........................................................
@@ -17,11 +26,14 @@ layout (location = 5) out vec4 ocolor9 ;
 layout (location = 6) out vec4 ocolor10; 
 layout (location = 7) out vec4 ocolor11; 
 
-
+/*========================================================================
+ * main body of the shader
+ *========================================================================
+ */
 void main(){
     // color declarations ................................................
-    vec4 color0, color1, color2, color3,  color4, color5, color6 ,
-         color7, color8, color9, color10, color11 ;
+    vec4 color0, color1, color2, color3,  color4, color5, 
+         color6, color7, color8, color9, color10, color11 ;
 
     // color initializations .............................................
     m           = 0.0074621 ;
@@ -53,8 +65,9 @@ void main(){
     Ki          = 143.79 ;
     Nass        = 7.23   ; 
     Nai         = 7.23   ;
-    
 
+    tvlt        = vlt ;
+    
     // output color values ...............................................
     ocolor4  = vec4( color4  ) ;
     ocolor5  = vec4( color5  ) ;

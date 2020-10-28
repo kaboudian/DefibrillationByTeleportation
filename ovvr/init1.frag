@@ -1,7 +1,15 @@
 #version 300 es
-
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * init1.frag   : initialize color-set 0 to 3
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Tue 27 Oct 2020 18:52:54 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
 #include    precision.glsl
 
+// interface variables ...................................................
 in vec2 cc  ;
 
 // variable macro ........................................................
@@ -19,8 +27,8 @@ layout (location = 3) out vec4 ocolor3 ;
  */
 void main(){
     // color declarations ................................................
-    vec4 color0, color1, color2, color3,  color4, color5, color6 ,
-         color7, color8, color9, color10, color11 ;
+    vec4 color0, color1, color2, color3,  color4, color5, 
+         color6, color7, color8, color9, color10, color11 ;
 
     // color initializations .............................................
     aCaMK       = 0.000515567 ;
