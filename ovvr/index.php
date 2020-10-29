@@ -16,7 +16,6 @@
 <!-- All shaders included here (codes written in GLSL)                 -->
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 
-
 <?php
     include "shader.php" ;
 

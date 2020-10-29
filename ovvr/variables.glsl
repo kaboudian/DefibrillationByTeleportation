@@ -23,6 +23,7 @@
 #define v           color4.g
 #define xK1         color4.b
 #define CaMKtrap    color4.a
+#define CaMKt       CaMKtrap
 
 #define Cansr       color5.r
 #define Cajsr       color5.g
@@ -54,3 +55,4 @@
 #define islow       color10.a
 
 #define tvlt        color11.r
+#define time        color11.g

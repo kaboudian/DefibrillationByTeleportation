@@ -3,7 +3,7 @@
  * comp1.frag   : march color-set 0 to 3 for one time step
  *
  * PROGRAMMER   : ABOUZAR KABOUDIAN
- * DATE         : Tue 27 Oct 2020 18:52:54 (EDT)
+ * DATE         : Wed 28 Oct 2020 12:21:16 (EDT)
  * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
  *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
  */
@@ -11,16 +11,12 @@
 
 // interface variables ...................................................
 in vec2 cc  ;
-uniform sampler2D   
-        icolor0, icolor1, icolor2, icolor3,  icolor4, icolor5, 
-        icolor6, icolor7, icolor8, icolor9, icolor10, icolor11 ;
 
-uniform float dt ;
+// uniforms and useful macros ............................................
+#include    compuniforms.glsl
 
-// multipliers ...........................................................
-#include    multipliers.glsl
+// variable macros .......................................................
 
-// variable macro ........................................................
 #include    variables.glsl
 
 // color outputs .........................................................
@@ -29,6 +25,8 @@ layout (location = 1) out vec4 ocolor1 ;
 layout (location = 2) out vec4 ocolor2 ; 
 layout (location = 3) out vec4 ocolor3 ; 
 
+
+// Functions/macros for Rush-Larsen time integration .....................
 
 #include    rush_larsen.glsl
 
@@ -216,4 +214,6 @@ void main(){
     ocolor1 = vec4(color1) ;
     ocolor2 = vec4(color2) ;
     ocolor3 = vec4(color3) ;
+
+    return ;
 }

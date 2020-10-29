@@ -92,34 +92,148 @@ function loadWebGL(){
 
         env.time = 0. ;
     }
+/*------------------------------------------------------------------------
+ * Initiate all coeficients 
+ *------------------------------------------------------------------------
+ */
+    // current multipliers ...............................................
+    env.currentMultipliers = [
+        'C_Na',     'C_Nafast', 'C_Nalate', 'C_NaCa',   'C_to',     
+        'C_CaL',    'C_CaNa',   'C_CaK',    'C_Kr',     'C_Ks',     
+        'C_K1',     'C_NaCai',  'C_NaCass', 'C_NaKNa',  'C_NaKK',   
+        'C_NaK',    'C_Nab',    'C_Kb',     'C_Cab',    'C_pCa',    
+        'C_relNP',  'C_relCaMK','C_upNP',   'C_upCaMK', 'C_leak',   
+        'C_up',     'C_tr',     'C_rel',    'C_diffCa', 'C_diffNa',
+        'C_diffK' ] ;
+    
+    // time multipliers ..................................................
+    env.timeMultipliers = [
+        'Ct_m',     'Ct_h',         'Ct_j',         'Ct_hCaMKslow', 
+        'Ct_hslow', 'Ct_mL',        'Ct_jCaMK',     'Ct_hL', 
+        'Ct_hLCaMK','Ct_a',         'Ct_ifast',     'Ct_islow', 
+        'Ct_aCaMK', 'Ct_iCaMKfast', 'Ct_iCaMKslow', 'Ct_d',     
+        'Ct_ffast', 'Ct_fslow',     'Ct_fCafast',   'Ct_fCaslow', 
+        'Ct_jCa',   'Ct_fCaMKfast', 'Ct_fCaCaMKfast','Ct_n', 
+        'Ct_xrfast','Ct_xrslow',    'Ct_xs1',       'Ct_xs2', 
+        'Ct_xk1',   'Ct_relNP',     'Ct_relCaMK',   'Ct_tr', 
+        'Ct_diffCa','Ct_diffNa',    'Ct_diffK', ] ;
+
+    // scaling factors ...................................................
+    env.scalingFactors = [
+        'SGNalate' , 'SGto' ,       'SPCa',         'SGKr'     ,
+        'SGKs'     , 'SGK1' ,       'SGNaCa',       'SGNaK'    , 
+        'SGKb'     , 'SJrel' ,      'SJup',         'SCMDN' ] ;
+
+    env.cellType = 2 ; // default is endocardial cells
+
+    // model parameters ..................................................
+    env.dt = 0.1 ;          /* time step size       */
+    env.ds = 10. ;          /* domain size          */
+    env.C_m = 1. ;          /* conductance          */
+    env.diffCoef = 0.001 ;  /* diffusion            */
+
+    env.modelFloats  = [ 'dt', 'ds', 'C_m', 'diffCoef' ] ;
+
+    // extra-cellular concentrations .....................................
+    env.Na_o  = 140 ;       /* Sodium               */
+    env.Ca_o = 1.8 ;        /* Calcium              */ 
+    env.K_o = 5.4 ;         /* Potasium             */
+
+    env.extraCellularConcentrations = [ 'Na_o', 'Ca_o', 'K_o' ] ;
+
+    // all float uniforms to be sent to comp1 and comp2 ..................
+    env.compFloatUniforms = [
+        ...env.currentMultipliers,  ...env.timeMultipliers,
+        ...env.scalingFactors,      ...env.modelFloats,
+        ...env.extraCellularConcentrations ] ;
+
+    env.compIntUniforms = [ 
+        'cellType' ] ;
+    
+    // all float uniforms that need to be initialized with ones ..........
+    env.oneFloats = [
+        ...env.currentMultipliers,  ...env.timeMultipliers,
+        ...env.scalingFactors ] ;
+
+    // initialize values to 1.0 ..........................................
+    for(let i in env.oneFloats){
+        let name = env.oneFloats[i] ;
+        env[name] = 1. ;
+    }
+
+    // Common uniforms for comp1 & comp2 solvers .........................
+    class CompUniforms{
+        constructor( obj, floats, ints){
+            for(let i in floats ){
+                let name = floats[i] ;
+                this[name] = { type :'f', value : obj[name] } ;
+            }
+            for(let i in ints){
+                let name = ints[i] ;
+                this[name] = { type : 'f', value : obj[name] } ;
+            }
+        }
+    }
+
+    // uniforms for comp1 solvers ........................................
+    function Comp1Uniforms( _fc, _sc ){
+            let uniforms = new CompUniforms(
+                    env, env.compFloatUniforms, env.compIntUniforms ) ;  
+            
+            for(let i=0; i<12 ; i++){
+                uniforms['icolor'+i] = { type : 't', value : _fc[i] } ;
+            }
+            return uniforms ;
+    } ;
+
+    // uniforms for comp2 solvers ........................................
+    function Comp2Uniforms( _fc, _sc ){
+            let uniforms = new CompUniforms(
+                    env, env.compFloatUniforms, env.compIntUniforms ) ; 
+            for(let i=0; i<4 ; i++){
+                uniforms['icolor'+i] = { type : 't', value : _sc[i] } ;
+            }
+            for(let i=4; i<12 ; i++){
+                uniforms['icolor'+i] = { type : 't', value : _fc[i] } ;
+            }
+            return uniforms ;
+    } ;
 
 /*------------------------------------------------------------------------
  * marching steps 
  *------------------------------------------------------------------------
  */
+    // comp1 solvers .....................................................
     env.fcomp1 = new Abubu.Solver({
         fragmentShader : source('comp1') ,
+        uniforms : new Comp1Uniforms( env.fcolors, env.scolors ) ,
         targets : new OvvrTargets1( env.scolors ) ,
     } ) ;
-//
-//    // reads fcolors and writes scolors ..................................
-//    env.fcomp = new Abubu.Solver({
-//        fragmentShader : source('comp') ,
-//        uniforms : new compUniforms( env.fcolors ) ,
-//        targets : new TpTargets( env.scolors ) ,
-//    } ) ;
-//
-//    // reads scolors and writes fcolors ..................................
-//    env.scomp = new Abubu.Solver({
-//        fragmentShader : source('comp') ,
-//        uniforms : new compUniforms( env.scolors ) ,
-//        targets : new TpTargets( env.fcolors ) ,
-//    } ) ;
+    env.scomp1 = new Abubu.Solver({
+        fragmentShader : source('comp1') ,
+        uniforms : new Comp1Uniforms( env.scolors, env.fcolors ) ,
+        targets : new OvvrTargets1( env.fcolors ) ,
+    } ) ;
+
+    // comp2 solvers .....................................................
+    env.fcomp2 = new Abubu.Solver({
+        fragmentShader : source( 'comp2' ) ,
+        uniforms : new Comp2Uniforms( env.fcolors, env.scolors ) ,
+        targets : new OvvrTargets2( env.scolors ) ,
+    } ) ;
+
+    env.scomp2 = new Abubu.Solver({
+        fragmentShader : source( 'comp2' ) ,
+        uniforms : new Comp2Uniforms( env.scolors, env.fcolors ) ,
+        targets : new OvvrTargets2( env.fcolors ) ,
+    } ) ;
 
     // marches the solution for two time steps ...........................
     env.march = function(){
-        //env.fcomp.render() ;
-        //env.scomp.render() ;
+        env.fcomp1.render() ;
+        env.fcomp2.render() ;
+        env.scomp1.render() ;
+        env.scomp2.render() ;
         env.time += 2.*env.dt ;
     } ;
 
@@ -423,7 +537,8 @@ function createGui(){
 
     // model parameters ..................................................
     var mdl = panel.addFolder("Model Parameters") ;
-    addToGui(mdl, env,[ ], [env.fcomp, env.scomp] ) ;
+    addToGui(mdl, env,[ ], 
+            [env.fcomp1, env.fcomp2, env.scomp1, env.scomp2] ) ;
 
     // defibrilation -----------------------------------------------------
     var dfb = panel.addFolder("Defibrillation") ;
