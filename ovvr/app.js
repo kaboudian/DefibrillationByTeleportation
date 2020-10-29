@@ -308,43 +308,32 @@ function loadWebGL(){
  */
 
     // save file .........................................................
-    env.csvFileName = 'colorsSets_0_4.csv' ;
+    env.csvFileName = 'colorsSets_0_10.csv' ;
     env.saveCsvFile = function(){
         var link = document.createElement('a') ;
         var data = "data:text;charset=utf-8," +
-            env.fcolor0.width + ',' + 
-            env.fcolor0.height ;
-        var width = env.fcolor0.width ;
-        var height = env.fcolor0.height ;
-        var f0 = env.fcolor0.value ;
-        var f1 = env.fcolor1.value ;
-        var f2 = env.fcolor2.value ;
-        var f3 = env.fcolor3.value ;
-        var f4 = env.fcolor4.value ;
+            env.width + ',' + 
+            env.height ;
+        var width   = env.width ;
+        var height = env.height ;
+        var fvals = {} ;
+        for(let i=0;i<11; i++){
+            let color = "fcolor"+i ;
+            fvals[color] = env[color].value ;
+        }
 
         for(var i=0 ; i<(width*height) ; i++){
             var indx = i*4 ;
-            data += ','+ 
-                f0[indx  ].toExponential()+ ',' +
-                f0[indx+1].toExponential()+ ',' +
-                f0[indx+2].toExponential()+ ',' +
-                f0[indx+3].toExponential()+ ',' +
-                f1[indx  ].toExponential()+ ',' +
-                f1[indx+1].toExponential()+ ',' +
-                f1[indx+2].toExponential()+ ',' +
-                f1[indx+3].toExponential()+ ',' +
-                f2[indx  ].toExponential()+ ',' +
-                f2[indx+1].toExponential()+ ',' +
-                f2[indx+2].toExponential()+ ',' +
-                f2[indx+3].toExponential()+ ',' +
-                f3[indx  ].toExponential()+ ',' +
-                f3[indx+1].toExponential()+ ',' +
-                f3[indx+2].toExponential()+ ',' +
-                f3[indx+3].toExponential()+ ',' +
-                f4[indx  ].toExponential()+ ',' +
-                f4[indx+1].toExponential()+ ',' +
-                f4[indx+2].toExponential()+ ',' +
-                f4[indx+3].toExponential() ;
+            let rows = "" ;
+            for( let j=0; j<11; j++){
+                name = "fcolor"+j ;
+                rows += ',' + 
+                fvals[name][indx  ].toExponential()+ ',' +
+                fvals[name][indx+1].toExponential()+ ',' +
+                fvals[name][indx+2].toExponential()+ ',' +
+                fvals[name][indx+3].toExponential() ;
+            }
+            data += rows ;
         }
         
         var csv = encodeURI( data ) ;
@@ -375,7 +364,7 @@ function loadWebGL(){
             var height = parseInt(data[1]) ;
     
             var tabs = [] ;
-            for(var i = 0 ; i<5 ; i++){
+            for(var i = 0 ; i<11 ; i++){
                 tabs.push( new Float32Array(width*height*4) ) ;
             }
             
@@ -384,7 +373,7 @@ function loadWebGL(){
 
             for (var i=0 ; i< (width*height) ; i++){ // modify accordingly
                 indx = i*4 ;
-                for(var j=0 ; j< 5 ; j++){
+                for(var j=0 ; j<11 ; j++){
                     tabs[j][ indx   ] = parseFloat( data[p++]) ;
                     tabs[j][ indx+1 ] = parseFloat( data[p++]) ;
                     tabs[j][ indx+2 ] = parseFloat( data[p++]) ;
@@ -392,7 +381,7 @@ function loadWebGL(){
                 }
              }
 
-            for( var j=0 ; j<5; j++){
+            for( var j=0 ; j<11; j++){
                 env.fcolors[j].data = tabs[j] ;
                 env.scolors[j].data = tabs[j] ;
             }
@@ -547,7 +536,6 @@ function createGui(){
 
     var scl  = mdl.addFolder("Scaling Factors") ;
     addToGui( scl,env, env.scalingFactors, env.comps ) ;
-
 
 
     // defibrilation -----------------------------------------------------
