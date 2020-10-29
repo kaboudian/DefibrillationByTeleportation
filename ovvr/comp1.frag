@@ -47,7 +47,6 @@ void main(){
     vec4 color8  = texture( icolor8  , cc ) ;
     vec4 color9  = texture( icolor9  , cc ) ;
     vec4 color10 = texture( icolor10 , cc ) ;
-    vec4 color11 = texture( icolor11 , cc ) ;
 
     // aCaMK .............................................................
     float   aCaMKinf = 1./

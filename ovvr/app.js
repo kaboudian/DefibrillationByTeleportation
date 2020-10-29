@@ -22,7 +22,7 @@ function loadWebGL(){
  */
     env.fcolors = [] ;
     env.scolors = [] ;
-    for(var i=0; i<12; i++){
+    for(var i=0; i<11; i++){
         env['fcolor'+i] = new Abubu.Float32Texture( 
                 env.width, env.height, { pairable : true } ) ;
         env['scolor'+i] = new Abubu.Float32Texture( 
@@ -31,26 +31,21 @@ function loadWebGL(){
         env.scolors.push(env['scolor'+i]) ;
     }
     env.colors = [ ...env.fcolors, ...env.scolors ] ;
-    for(var i=0; i< env.colors.length ; i++){
-        env.colors[i].pairable = true ;
-    }
 
-    function OvvrTargets1( colors ){
-        this.ocolor0    = { location : 0 , target : colors[0] } ;
-        this.ocolor1    = { location : 1 , target : colors[1] } ;
-        this.ocolor2    = { location : 2 , target : colors[2] } ;
-        this.ocolor3    = { location : 3 , target : colors[3] } ;
+    class OvvrTargets1{
+        constructor( colors ){
+            for(let i=0; i<4 ; i++){
+                this["ocolor"+i] = {location : i, target: colors[i]} ;
+            }
+        }
     }
-
-    function OvvrTargets2( colors ){
-        this.ocolor4    = { location : 0 , target : colors[4] } ;
-        this.ocolor5    = { location : 1 , target : colors[5] } ;
-        this.ocolor6    = { location : 2 , target : colors[6] } ;
-        this.ocolor7    = { location : 3 , target : colors[7] } ;
-        this.ocolor8    = { location : 4 , target : colors[8] } ;
-        this.ocolor9    = { location : 5 , target : colors[9] } ;
-        this.ocolor10   = { location : 6 , target : colors[10] } ;
-        this.ocolor11   = { location : 7 , target : colors[11] } ;
+    class OvvrTargets2{
+        constructor( colors ){
+            for ( let i =0 ; i< 7 ; i++){
+                let j=4+i ;
+                this["ocolor"+j] = { location : i, target : colors[j] } ;
+            }
+        }
     }
 
 /*------------------------------------------------------------------------
@@ -98,13 +93,14 @@ function loadWebGL(){
  */
     // current multipliers ...............................................
     env.currentMultipliers = [
-        'C_Na',     'C_Nafast', 'C_Nalate', 'C_NaCa',   'C_to',     
-        'C_CaL',    'C_CaNa',   'C_CaK',    'C_Kr',     'C_Ks',     
-        'C_K1',     'C_NaCai',  'C_NaCass', 'C_NaKNa',  'C_NaKK',   
-        'C_NaK',    'C_Nab',    'C_Kb',     'C_Cab',    'C_pCa',    
-        'C_relNP',  'C_relCaMK','C_upNP',   'C_upCaMK', 'C_leak',   
-        'C_up',     'C_tr',     'C_rel',    'C_diffCa', 'C_diffNa',
-        'C_diffK' ] ;
+        'C_Na',     'C_Nafast',     'C_Nalate',     'C_NaCa',   
+        'C_to',     'C_CaL',        'C_CaNa',       'C_CaK',        
+        'C_Kr',     'C_Ks',         'C_K1',         'C_NaCai',      
+        'C_NaCass', 'C_NaKNa',      'C_NaKK',       'C_NaK',    
+        'C_Nab',    'C_Kb',         'C_Cab',        'C_pCa',    
+        'C_relNP',  'C_relCaMK',    'C_upNP',       'C_upCaMK', 
+        'C_leak',   'C_up',         'C_tr',         'C_rel',        
+        'C_diffCa', 'C_diffNa',     'C_diffK'                       ] ;
     
     // time multipliers ..................................................
     env.timeMultipliers = [
@@ -116,7 +112,7 @@ function loadWebGL(){
         'Ct_jCa',   'Ct_fCaMKfast', 'Ct_fCaCaMKfast','Ct_n', 
         'Ct_xrfast','Ct_xrslow',    'Ct_xs1',       'Ct_xs2', 
         'Ct_xk1',   'Ct_relNP',     'Ct_relCaMK',   'Ct_tr', 
-        'Ct_diffCa','Ct_diffNa',    'Ct_diffK', ] ;
+        'Ct_diffCa','Ct_diffNa',    'Ct_diffK',                     ] ;
 
     // scaling factors ...................................................
     env.scalingFactors = [
@@ -127,27 +123,27 @@ function loadWebGL(){
     env.cellType = 2 ; // default is endocardial cells
 
     // model parameters ..................................................
-    env.dt = 0.1 ;          /* time step size       */
-    env.ds = 10. ;          /* domain size          */
-    env.C_m = 1. ;          /* conductance          */
-    env.diffCoef = 0.001 ;  /* diffusion            */
+    env.dt          = 0.05 ;        /* time step size       */
+    env.ds          = 10. ;         /* domain size          */
+    env.C_m         = 1. ;          /* conductance          */
+    env.diffCoef    = 0.001 ;       /* diffusion            */
 
-    env.modelFloats  = [ 'dt', 'ds', 'C_m', 'diffCoef' ] ;
+    env.modelFloats = [ 'dt', 'ds', 'C_m', 'diffCoef' ] ;
 
     // extra-cellular concentrations .....................................
-    env.Na_o  = 140 ;       /* Sodium               */
-    env.Ca_o = 1.8 ;        /* Calcium              */ 
-    env.K_o = 5.4 ;         /* Potasium             */
+    env.Na_o        = 140 ;         /* Sodium               */
+    env.Ca_o        = 1.8 ;         /* Calcium              */ 
+    env.K_o         = 5.4 ;         /* Potasium             */
 
     env.extraCellularConcentrations = [ 'Na_o', 'Ca_o', 'K_o' ] ;
 
     // all float uniforms to be sent to comp1 and comp2 ..................
-    env.compFloatUniforms = [
+    env.compFloats = [
         ...env.currentMultipliers,  ...env.timeMultipliers,
         ...env.scalingFactors,      ...env.modelFloats,
         ...env.extraCellularConcentrations ] ;
 
-    env.compIntUniforms = [ 
+    env.compInts = [ 
         'cellType' ] ;
     
     // all float uniforms that need to be initialized with ones ..........
@@ -165,38 +161,39 @@ function loadWebGL(){
     class CompUniforms{
         constructor( obj, floats, ints){
             for(let i in floats ){
-                let name = floats[i] ;
-                this[name] = { type :'f', value : obj[name] } ;
+                let name    = floats[i] ;
+                this[name]  = { type :'f', value : obj[name] } ;
             }
             for(let i in ints){
-                let name = ints[i] ;
-                this[name] = { type : 'f', value : obj[name] } ;
+                let name    = ints[i] ;
+                this[name]  = { type : 'i', value : obj[name] } ;
             }
         }
     }
 
     // uniforms for comp1 solvers ........................................
-    function Comp1Uniforms( _fc, _sc ){
-            let uniforms = new CompUniforms(
-                    env, env.compFloatUniforms, env.compIntUniforms ) ;  
-            
-            for(let i=0; i<12 ; i++){
-                uniforms['icolor'+i] = { type : 't', value : _fc[i] } ;
-            }
-            return uniforms ;
-    } ;
+    class Comp1Uniforms extends CompUniforms{
+        constructor( _fc, _sc ){
+            super(env, env.compFloats, env.compInts) ;
+            for(let i=0; i<11 ; i++){
+                this['icolor'+i] = { type : 't', value : _fc[i] } ;
+            }   
+        }
+    }
 
     // uniforms for comp2 solvers ........................................
-    function Comp2Uniforms( _fc, _sc ){
-            let uniforms = new CompUniforms(
-                    env, env.compFloatUniforms, env.compIntUniforms ) ; 
+    class Comp2Uniforms extends CompUniforms{
+        constructor( _fc, _sc ){
+            super(env, env.compFloats, env.compInts ) ; 
+            // colors already updated by comp1
             for(let i=0; i<4 ; i++){
-                uniforms['icolor'+i] = { type : 't', value : _sc[i] } ;
+                this['icolor'+i] = { type : 't', value : _sc[i] } ;
             }
-            for(let i=4; i<12 ; i++){
-                uniforms['icolor'+i] = { type : 't', value : _fc[i] } ;
+            // other colors
+            for(let i=4; i<11 ; i++){
+                this['icolor'+i] = { type : 't', value : _fc[i] } ;
             }
-            return uniforms ;
+        }
     } ;
 
 /*------------------------------------------------------------------------
@@ -228,6 +225,7 @@ function loadWebGL(){
         targets : new OvvrTargets2( env.fcolors ) ,
     } ) ;
 
+    env.comps = [ env.fcomp1, env.fcomp2, env.scomp1, env.scomp2 ] ;
     // marches the solution for two time steps ...........................
     env.march = function(){
         env.fcomp1.render() ;
@@ -282,7 +280,7 @@ function loadWebGL(){
     env.defib = {} ;
     env.thickness  = 0.05 ;
     env.uThreshold = -20 ;
-    env.vThreshold = 0.25 ;
+    env.vThreshold = 0.45 ;
 
     env.defib_s1 = new Abubu.Solver({
         fragmentShader : source('defib') ,
@@ -303,6 +301,7 @@ function loadWebGL(){
         env.defib_s1.render() ;
         env.defib_s2.render() ;
     }
+
 /*------------------------------------------------------------------------
  * save and load file 
  *------------------------------------------------------------------------
@@ -537,8 +536,19 @@ function createGui(){
 
     // model parameters ..................................................
     var mdl = panel.addFolder("Model Parameters") ;
-    addToGui(mdl, env,[ ], 
-            [env.fcomp1, env.fcomp2, env.scomp1, env.scomp2] ) ;
+
+    addToGui(mdl, env,env.modelFloats , env.comps) ;
+
+    var crnt = mdl.addFolder("Current Multipliers") ;
+    addToGui(crnt, env,env.currentMultipliers , env.comps) ;
+    
+    var tcst = mdl.addFolder("Time Constant Multipliers") ;
+    addToGui(tcst, env,env.timeMultipliers , env.comps) ;
+
+    var scl  = mdl.addFolder("Scaling Factors") ;
+    addToGui( scl,env, env.scalingFactors, env.comps ) ;
+
+
 
     // defibrilation -----------------------------------------------------
     var dfb = panel.addFolder("Defibrillation") ;

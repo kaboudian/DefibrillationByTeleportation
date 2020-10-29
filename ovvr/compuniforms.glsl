@@ -2,7 +2,7 @@
 /* uniform samplers of state variables  */
 uniform sampler2D   
         icolor0, icolor1, icolor2, icolor3, icolor4,  icolor5, 
-        icolor6, icolor7, icolor8, icolor9, icolor10, icolor11 ;
+        icolor6, icolor7, icolor8, icolor9, icolor10 ;
 
 uniform float       dt ;                /* time step                */
 uniform float       ds ;                /* domain size in x,y-dir   */

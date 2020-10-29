@@ -27,7 +27,6 @@ layout (location = 3) out vec4 ocolor7  ;
 layout (location = 4) out vec4 ocolor8  ; 
 layout (location = 5) out vec4 ocolor9  ; 
 layout (location = 6) out vec4 ocolor10 ; 
-layout (location = 7) out vec4 ocolor11 ; 
 
 
 // Functions/macros for Rush-Larsen time integration .....................
@@ -95,7 +94,6 @@ void main(){
     vec4 color8  = texture( icolor8  , cc ) ;
     vec4 color9  = texture( icolor9  , cc ) ;
     vec4 color10 = texture( icolor10 , cc ) ;
-    vec4 color11 = texture( icolor11 , cc ) ;
     
     // m .................................................................
     float minf  = 1.0/(1.0+exp((-(V+39.57))/9.871)) ;
@@ -694,9 +692,8 @@ void main(){
     
     V += dv2dt*dt ;
 
-    // tvlt, time ........................................................
-    tvlt = V ;
-    time = ( time >1.e6 ) ? 0. : (time+dt) ;
+    // v: used for tracking wave back ....................................
+    v = hslow ;
 
     // output color values ...............................................
     ocolor4   = vec4( color4  ) ;
@@ -706,7 +703,6 @@ void main(){
     ocolor8   = vec4( color8  ) ;
     ocolor9   = vec4( color9  ) ;
     ocolor10  = vec4( color10 ) ;
-    ocolor11  = vec4( color11 ) ;
    
     return ;
 }
