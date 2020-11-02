@@ -20,13 +20,15 @@
     <canvas id=canvas_1 width=512 height=512>
         Your browser doesn't support HTML5.0
     </canvas>
-    <canvas id=canvas_3 width=512 height=512>
-        Your browser doesn't support HTML5.0
-    </canvas>
     <canvas id=canvas_2 width=512 height=512>
         Your browser doesn't support HTML5.0
     </canvas>
-
+    <canvas id=canvas_3 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
+    <canvas id=canvas_4 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
 
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -38,8 +40,11 @@
     shader('init' ) ;
     shader('march') ;
     shader('click') ;
-    shader('display') ;
+    shader('2dPhaseMap') ;
     shader('defib') ;
+    shader('phaseUpdate') ;
+    shader('phaseDisplay') ;
+    shader('phaseInit') ;
 ?>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->

@@ -7,10 +7,13 @@ function source(id){
 var canvas_1 = document.getElementById('canvas_1') ;
 var canvas_2 = document.getElementById('canvas_2') ;
 var canvas_3 = document.getElementById('canvas_3') ;
+var canvas_4 = document.getElementById('canvas_4') ;
 
 // Object to be used for interactions ....................................
 var env = {} ;
 
+env.width               = 512 ;
+env.height              = 512 ;
 env.a                   = 0.1 ;
 env.b                   = 0.3 ;
 env.epsilon             = 0.01 ;
@@ -149,18 +152,110 @@ uplot.render() ;
 
 // thresholdPlot .........................................................
 var thresholdPlot = new Abubu.Solver({
-    fragmentShader : source("display") ,
+    fragmentShader : source("2dPhaseMap") ,
     uniforms : {
         inColor : { type : 't', value : fcolor } ,
         thickness  : { type : 'f', value : env.thickness   } ,
         uThreshold : { type : 'f', value : env.uThreshold  } ,
         vThreshold : { type : 'f', value : env.vThreshold  } ,
     } ,
-    canvas : canvas_3 
+    canvas : canvas_2 
 } ) ;
 
+// -----------------------------------------------------------------------
+// phase plot for the probe 
+// -----------------------------------------------------------------------
+env.fphase = new Abubu.Float32Texture(env.width, env.height) ;
+env.sphase = new Abubu.Float32Texture(env.width, env.height) ;
+
+env.phaseInit = new Abubu.Solver({
+    fragmentShader : source('phaseInit') ,
+    targets : {
+        ocolor1 : { location : 0 , target: env.fphase } ,
+        ocolor2 : { location : 1 , target: env.sphase } ,
+    } 
+} ) ;
+
+env.phase   = new Abubu.Solver({
+    fragmentShader : source( 'phaseUpdate' ) ,
+    uniforms : {
+        icolor      : { type : 's',     value : env.fphase  } ,
+        ucolor      : { type : 's',     value : fcolor      } ,
+        vcolor      : { type : 's',     value : scolor      } ,
+        uMultiplier : { type : 'v4',    value : [1,0,0,0]   } ,
+        vMultiplier : { type : 'v4',    value : [0,1,0,0]   } ,
+        uMin        : { type : 'f',     value : -.3         } ,
+        uMax        : { type : 'f',     value : 1.2         } ,
+        vMin        : { type : 'f',     value : -0.05       } ,
+        vMax        : { type : 'f',     value : .20         } ,
+    } ,
+    targets : { 
+        ocolor : { location : 0 , target : env.sphase } ,
+    }
+} ) ;
+
+env.phaseCopy = new Abubu.Copy( env.sphase, env.fphase ) ;
+
+env.fcanvas = document.createElement('canvas') ;
+env.fcanvas.width = env.width ;
+env.fcanvas.height = env.height ;
+
+env.phaseDisp = new Abubu.Solver({
+    fragmentShader : source( 'phaseDisplay') ,
+    uniforms : { 
+       icolor : { type : 's', value : env.fphase } ,
+    } ,
+    canvas : env.fcanvas , 
+} ) ;
+
+env.bcanvas = document.createElement('canvas') ;
+env.bcanvas.width = env.width ;
+env.bcanvas.height = env.height ;
+
+env.bcontext = env.bcanvas.getContext('2d') ;
+env.fcontext = canvas_4.getContext('2d') ;
+
+var minX = -.05 ;
+var maxX = 0.20 ;
+var minY = -.3;
+var maxY = 1.2 ;
+var width = env.width ;
+var height = env.height ;
+
+function Px(x){
+    return width*(x-minX)/(maxX-minX) ;
+}
+function Py(y){
+    return height*(maxY-y)/(maxY-minY) ;
+}
+
+// horizontal grid lines
+for(let j=1 ; j<15; j++){
+    env.bcontext.strokeStyle = "#aaaaaa" ;
+    env.bcontext.setLineDash([10,15]) ;
+    env.bcontext.moveTo(Px(minX), Py(minY + j*0.1)) ;
+    env.bcontext.lineTo(Px(maxX), Py(minY + j*0.1)) ;
+    env.bcontext.stroke() ;
+    env.bcontext.font = "16px Arial";
+    env.bcontext.fillText("" + (minY+j*0.1).toFixed(2),10,Py(minY+j*0.1));
+}
+
+// vertical grid lines
+for(let i=1 ; i<5; i++){
+    env.bcontext.strokeStyle = "#aaaaaa" ;
+    env.bcontext.setLineDash([10,15]) ;
+    env.bcontext.moveTo(Px(minX+0.05*i), Py(minY)) ;
+    env.bcontext.lineTo(Px(minX+0.05*i), Py(maxY)) ;
+    env.bcontext.stroke() ;
+    env.bcontext.textAlign = "center";
+    env.bcontext.font = "16px Arial";
+    env.bcontext.fillText("" + (minX+i*0.05).toFixed(2),Px(minX+0.05*i),
+            Py(minY)-10);
+    env.bcontext.stroke() ;
+}
+
+
 // signal plots ----------------------------------------------------------
-// canvas_2 
 var splot = new Abubu.SignalPlot({
     noPltPoints : 1024, // number of sample points
     grid : 'on', 
@@ -170,7 +265,7 @@ var splot = new Abubu.SignalPlot({
     xticks : {  mode : 'auto', unit : 'ms', font : '11pt Times' } ,
     yticks : {  mode : 'auto', unit : '' , 
                 font : '12pt Times',precision : 1  } ,
-    canvas : canvas_2 
+    canvas : canvas_3 
 } ) ;
 
 splot.addMessage(
@@ -203,7 +298,7 @@ env.usgn = splot.addSignal( fcolor, {
     timewindow : 1000 , 
     probePosition : [0.5,0.5] 
 } ) ;
-//
+
 // updateSignals ---------------------------------------------------------
 function updateSignals(){
     env.usgn.update(env.time) ;
@@ -213,6 +308,14 @@ function updateSignals(){
 // refreshDisplay ........................................................
 function refreshDisplay(){
     splot.render() ;
+
+    env.phase.render() ;
+    env.phaseCopy.render() ;
+    env.phaseDisp.render() ;
+    env.fcontext.clearRect( 0,0, env.width, env.height ) ;
+    env.fcontext.drawImage( env.bcanvas, 0,0 ) ;
+    env.fcontext.drawImage( env.fcanvas, 0,0 ) ;
+    
     uplot.time.text = "Time = " + env.time.toFixed(2) + " ms" ;
     uplot.init() ;
     uplot.render() ;
@@ -223,6 +326,7 @@ function refreshDisplay(){
 env.initialize = function(){
     env.time = 0 ;
     init.render() ;
+    env.phaseInit.render() ;
     splot.init() ;
     env.usgn.init(0) ;
     env.vsgn.init(0) ;
@@ -280,7 +384,7 @@ var mouseDrag_1 = new Abubu.MouseListener({
 } ) ; 
 
 var mouseDrag_2 = new Abubu.MouseListener({
-    canvas : canvas_3 ,
+    canvas : canvas_2 ,
     event : 'drag' ,
     callback : function(e){
         click.uniforms.clickPosition.value = e.position ;
