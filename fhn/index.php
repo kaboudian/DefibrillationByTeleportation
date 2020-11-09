@@ -17,19 +17,32 @@
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 <body>
     <h1>The FitzHugh-Nagumo Model</h1>
-    <canvas id=canvas_1 width=512 height=512>
-        Your browser doesn't support HTML5.0
-    </canvas>
-    <canvas id=canvas_2 width=512 height=512>
-        Your browser doesn't support HTML5.0
-    </canvas>
-    <canvas id=canvas_3 width=512 height=512>
-        Your browser doesn't support HTML5.0
-    </canvas>
-    <canvas id=canvas_4 width=512 height=512>
-        Your browser doesn't support HTML5.0
-    </canvas>
-
+    <table>
+        <tr>
+            <td>
+                <canvas id=canvas_1 width=512 height=512>
+                    Your browser doesn't support HTML5.0
+                </canvas>
+            </td>
+            <td>
+                <canvas id=canvas_2 width=512 height=512>
+                    Your browser doesn't support HTML5.0
+                </canvas>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <canvas id=canvas_3 width=512 height=512>
+                    Your browser doesn't support HTML5.0
+                </canvas>
+            </td>
+            <td>
+                <canvas id=canvas_4 width=512 height=512>
+                    Your browser doesn't support HTML5.0
+                </canvas>
+            </td>
+        </tr>
+    </table>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 <!-- All shaders included here (codes written in GLSL)                 -->

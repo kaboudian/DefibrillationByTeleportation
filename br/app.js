@@ -276,7 +276,7 @@ function loadWebGL(){
     } ) ; 
 
     var mouseDrag_2 = new Abubu.MouseListener({
-        canvas : document.getElementById('canvas_3') ,
+        canvas : document.getElementById('canvas_2') ,
         event : 'drag' ,
         callback : function(e){
             click.uniforms.clickPosition.value = e.position ;
@@ -284,6 +284,39 @@ function loadWebGL(){
             clickCopy.render() ;
         }
     } ) ; 
+
+/*------------------------------------------------------------------------
+ * shift-click to set probe position 
+ *------------------------------------------------------------------------
+ */
+
+    var setProbe_1 = new Abubu.MouseListener({
+        canvas : document.getElementById('canvas_1') ,
+        event  : 'click' ,
+        shift  : true ,
+        callback : function(e){
+            env.pplot.probePosition = e.position ;
+            env.pplot.init() ;
+            env.vplot.setProbePosition(e.position) ;
+            env.splot.setProbePosition(e.position) ;
+            env.splot.init() ;
+            env.vplot.init() ;
+        }
+    } ) ;
+
+    var setProbe_2 = new Abubu.MouseListener({
+        canvas : document.getElementById('canvas_2') ,
+        event  : 'click' ,
+        shift  : true ,
+        callback : function(e){
+            env.pplot.probePosition = e.position ;
+            env.pplot.init() ;
+            env.vplot.setProbePosition(e.position) ;
+            env.splot.setProbePosition(e.position) ;
+            env.splot.init() ;
+            env.vplot.init() ;
+        }
+    } ) ;
 
 /*------------------------------------------------------------------------
  * defibrilate 
@@ -405,6 +438,7 @@ function loadWebGL(){
         minValue : -90 ,
         maxValue : 30 ,
         colorbar : true ,
+        probeVisible : true ,
         canvas : document.getElementById('canvas_1') ,
     } ) ;
     env.vplot.init() ;
@@ -418,7 +452,7 @@ function loadWebGL(){
             uThreshold : { type : 'f', value : env.uThreshold  } ,
             vThreshold : { type : 'f', value : env.vThreshold  } ,
         } ,
-        canvas :  document.getElementById('canvas_3') 
+        canvas :  document.getElementById('canvas_2') 
     } ) ;
 
     // signal plots ------------------------------------------------------
@@ -431,7 +465,7 @@ function loadWebGL(){
         xticks : {  mode : 'auto', unit : 'ms', font : '11pt Times' } ,
         yticks : {  mode : 'auto', unit : '' , 
                     font : '12pt Times',precision : 1  } ,
-        canvas : document.getElementById('canvas_2') 
+        canvas : document.getElementById('canvas_3') 
     } ) ;
 
     env.osgn = env.splot.addSignal( env.fcolor1, {
@@ -462,6 +496,38 @@ function loadWebGL(){
     env.vsgn.init(0) ;
     env.osgn.init(0) ;
 
+    // phase plot --------------------------------------------------------
+    env.pplot = new Abubu.PhasePlot({
+        canvas : document.getElementById('canvas_4') ,
+        grid : 'on',
+        probePosition : [0.5,0.5], 
+    
+        // horizontal axis info
+        xcolor      : env.fcolor1 ,
+        xchannel    : 'a' ,
+        xmin        : -.5 ,
+        xmax        : 1.5 ,
+        nx          : 10, 
+    
+        // vertical axis info
+        ycolor      : env.fcolor1 ,
+        ychannel    : 'r' ,
+        ymin        : -90 ,
+        ymax        : 30 ,
+        ny          : 12, 
+    
+        // xticks
+        xticks : {  
+            mode : 'auto', 
+            unit : '', 
+            font : '11pt Times' , precision : 2 } ,
+        
+        // yticks
+        yticks : {  
+            mode : 'auto', unit : '', font : '11pt Times', 
+            precision : 1 } ,
+    }) ; 
+
     // updateSignals -----------------------------------------------------
     env.updateSignals= function(){
         env.vsgn.update(env.time) ;
@@ -470,6 +536,7 @@ function loadWebGL(){
 
     // refreshDisplay ----------------------------------------------------
     env.refreshDisplay = function(){
+        env.pplot.render() ;
         env.vplot.render() ;
         env.splot.render() ;
         env.tplot.render() ;
@@ -486,6 +553,10 @@ function loadWebGL(){
             for(var i = 0 ; i<env.skip ; i++){
                 env.march() ;
                 env.updateSignals() ; 
+
+                if ( i%5 === 0 ){
+                    env.pplot.update() ;
+                }
             }
         }
         env.refreshDisplay() ;

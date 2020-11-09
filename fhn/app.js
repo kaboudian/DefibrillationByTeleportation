@@ -163,7 +163,7 @@ var thresholdPlot = new Abubu.Solver({
 } ) ;
 
 // phase plot ------------------------------------------------------------
-env.pplot = new Abubu.PhasePlot({
+var pplot = new Abubu.PhasePlot({
     canvas : canvas_4 ,
     grid : 'on',
     probePosition : [0.5,0.5], 
@@ -172,15 +172,15 @@ env.pplot = new Abubu.PhasePlot({
     xcolor : fcolor ,
     xchannel : 'g' ,
     xmin    : -0.05 ,
-    xmax    : 0.20 ,
-    nx      : 5, 
+    xmax    : 0.15 ,
+    nx      : 4, 
 
     // vertical axis info
     ycolor      : fcolor ,
     ychannel    : 'r' ,
     ymin        : -.3 ,
-    ymax        : 1.2 ,
-    ny          : 15, 
+    ymax        : 1. ,
+    ny          : 13, 
 
     // xticks
     xticks : {  
@@ -199,7 +199,7 @@ var splot = new Abubu.SignalPlot({
     noPltPoints : 1024, // number of sample points
     grid : 'on', 
     nx   : 10 , // number of division in x 
-    ny   : 15 , // ... in y 
+    ny   : 13 , // ... in y 
 
     xticks : {  mode : 'auto', unit : 'ms', font : '11pt Times' } ,
     yticks : {  mode : 'auto', unit : '' , 
@@ -218,7 +218,7 @@ splot.addMessage(
 env.vsgn = splot.addSignal( fcolor, {
     channel : 'g',
     minValue : -.3,
-    maxValue : 1.2 ,
+    maxValue : 1.0 ,
     restValue : 0 ,
     color : [ 0.,.4,0.0 ],
     visible : true ,
@@ -230,7 +230,7 @@ env.vsgn = splot.addSignal( fcolor, {
 env.usgn = splot.addSignal( fcolor, {
     channel : 'r',
     minValue : -.3,
-    maxValue : 1.2 ,
+    maxValue : 1.0 ,
     restValue : 0 ,
     color : [ .4,0.,0.0 ],
     visible : true ,
@@ -247,7 +247,7 @@ function updateSignals(){
 // refreshDisplay ........................................................
 function refreshDisplay(){
     splot.render() ;
-    env.pplot.render() ; 
+    pplot.render() ; 
     uplot.time.text = "Time = " + env.time.toFixed(2) + " ms" ;
     uplot.init() ;
     uplot.render() ;
@@ -267,14 +267,14 @@ env.initialize = function(){
 
 // solution and visualization sequence ...................................
 function run(){
-        if (env.running){
-            for(var i = 0 ; i<env.skip ; i++){
-                march() ;
-                updateSignals() ;
-            }
-            refreshDisplay() ;
+    if (env.running){
+        for(var i = 0 ; i<env.skip ; i++){
+            march() ;
+            updateSignals() ;
         }
-        requestAnimationFrame(run) ;
+    }
+    refreshDisplay() ;
+    requestAnimationFrame(run) ;
 }
 
 // click -----------------------------------------------------------------
@@ -332,12 +332,29 @@ var setProbe = new Abubu.MouseListener({
     event  : 'click' ,
     shift  : true ,
     callback : function(e){
+        pplot.probePosition = e.position ;
+        pplot.init() ;
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
         uplot.init() ;
     }
 } ) ;
+
+var setProbe = new Abubu.MouseListener({
+    canvas : canvas_2 ,
+    event  : 'click' ,
+    shift  : true ,
+    callback : function(e){
+        pplot.probePosition = e.position ;
+        pplot.init() ;
+        uplot.setProbePosition(e.position) ;
+        splot.setProbePosition(e.position) ;
+        splot.init() ;
+        uplot.init() ;
+    }
+} ) ;
+
 
 // saveCsvFile : save an array to disk as comma separated values .........
 env.csvFileName = 'fcolor.csv' ;
