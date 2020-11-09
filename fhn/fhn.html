@@ -1,3 +1,344 @@
+<!doctype html>
+<html>
+<head>
+    <title>FHN</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <script src='https://abubujs.org/libs/Abubu.latest.js' 
+	    type='text/javascript'></script>
+
+    <link rel="stylesheet" type="text/css" href="abubu_app.css">
+
+</head>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- body of the html page                                             -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<body>
+    <h1>The FitzHugh-Nagumo Model</h1>
+    <canvas id=canvas_1 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
+    <canvas id=canvas_2 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
+    <canvas id=canvas_3 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
+    <canvas id=canvas_4 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- All shaders included here (codes written in GLSL)                 -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+
+<!-- ***************************************************************** -->
+<script id='init' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * init.frag    : initialize the domain
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Mon 19 Oct 2020 14:34:45 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+precision highp float ;
+precision highp int ;
+
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 color1 ;
+layout (location = 1) out vec4 color2 ;
+
+void main() {
+    vec4 color = vec4(0.) ;
+    
+    color1 = color ;
+    color2 = color ;
+    return ;
+}
+
+
+</script><!-- end of init shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='march' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * march.frag   : march the solution for one time step
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Mon 19 Oct 2020 14:35:07 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+// precision of variables ................................................
+precision highp float ;
+precision highp int ;
+
+// interfacial variables .................................................
+uniform sampler2D   inTexture ;
+uniform float       dt, diffCoef ;
+uniform float       period ;
+uniform bool        pacemakerActive , pacemakerCircular ;
+uniform float       pacemakerRadius , pacemakerX , pacemakerY ;
+uniform float       a, b, epsilon ;
+
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 ocolor ;
+
+// macros assigning color channels to values .............................
+#define u       color.r
+#define v       color.g
+#define time    color.b
+
+/*========================================================================
+ * main body of the shader
+ *========================================================================
+ */
+void main() {
+    vec2  size  = vec2(textureSize(inTexture, 0)) ;
+    float dx    = 10./size.x ;
+
+    vec2 ii = vec2(1.,0.)/size ;
+    vec2 jj = vec2(0.,1.)/size ;
+
+    // read the color of the pixel .......................................
+    vec4 color = texture( inTexture , cc ) ;
+    
+    vec4 laplacian = 
+            texture( inTexture, cc-ii )
+        +   texture( inTexture, cc+ii )
+        +   texture( inTexture, cc-jj )
+        +   texture( inTexture, cc+jj )
+        -4.*texture( inTexture, cc    ) ;
+    u += dt*diffCoef*laplacian.r/(dx*dx) ;
+
+    // gate time derivatives for FHN .....................................
+    float du2dt = u*(1.-u)*(u-a) - v ;
+    float dv2dt = epsilon*(b*u-v) ;
+
+    // marching gates ....................................................
+    u += du2dt*dt ;
+    v += dv2dt*dt ;
+
+    // pacemaker logic ...................................................
+    time += dt ;
+
+    if (time > period ){
+        time = 0. ;
+        if (pacemakerActive){
+            if (pacemakerCircular){
+                if ( length(cc - vec2(pacemakerX, pacemakerY)) <
+                        pacemakerRadius ){
+                    u = 1. ;
+                }
+            }else{
+                if ( (abs( cc.x - pacemakerX )*2.) < pacemakerRadius ){
+                    u = 1. ;
+                }
+            }
+        }
+    }
+
+    // output the color of the pixel .....................................
+    ocolor = color ;
+    return ;
+}
+
+
+</script><!-- end of march shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='click' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * click.frag   : Changes u or v values around a click location
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Mon 19 Oct 2020 14:34:00 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+precision highp float ;
+precision highp int ;
+
+uniform sampler2D   inTexture ;
+uniform vec2    clickPosition ;
+uniform float   clickRadius ;
+uniform float   clickU,clickV ;
+uniform bool    clickAlterU, clickAlterV ;
+
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 ocolor ;
+
+#define u       color.r
+#define v       color.g
+#define time    color.b
+// Main body of the shader
+void main() {
+    vec2  size  = vec2(textureSize(inTexture, 0)) ;
+
+    // read the color of the pixel .......................................
+    vec4 color = texture( inTexture , cc ) ;
+ 
+    if ( length(clickPosition - cc )< clickRadius ){
+        if ( clickAlterU ){
+            u = clickU ;
+        }
+        if ( clickAlterV ){
+            v = clickV ;
+        }
+    }
+
+    // output the color of the pixel .....................................
+    ocolor = color ;
+    return ;
+}
+
+
+</script><!-- end of click shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='2dPhaseMap' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * display.frag : calculate the colors for the various regions of
+ * activation
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Mon 19 Oct 2020 14:23:21 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float ;
+precision highp int ;
+
+// interface variables ---------------------------------------------------
+in vec2 cc ;
+uniform sampler2D   inColor ;
+uniform float       uThreshold, vThreshold ;
+uniform float       thickness ;
+
+layout (location=0) out vec4 ocolor ;
+
+// macros ----------------------------------------------------------------
+#define ut  uThreshold
+#define vt  vThreshold
+
+#define u   color.r
+#define v   color.g
+
+/*========================================================================
+ * main body 
+ *========================================================================
+ */
+void main(){
+    vec4 color = texture(inColor , cc ) ;
+
+    float f = (u>ut) ? 1. : 0. ;
+    float g = (v>vt) ? 1. : 0. ;
+
+    if ( f>0.5 && g >0.5 ){
+        ocolor = vec4(vec3(96., 192., 240.)/255.,1.) ;
+        return ;
+    }
+
+    if ( f > 0.5 ){
+        ocolor = vec4(vec3(240., 72., 72.)/255.,1.) ;
+        return ;
+    }
+
+    if ( g >0.5 ){
+        ocolor =  vec4(vec3(240., 192., 72.)/255.,1.) ;
+        return ;
+    }
+
+    ocolor = vec4(vec3(255., 255., 240.)/255.,1.) ;
+    return ;
+}
+
+
+</script><!-- end of 2dPhaseMap shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='defib' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * defib.frag   : Defibrillation shader
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Mon 19 Oct 2020 14:18:47 (EDT)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float ;
+precision highp int ;
+
+// interface variables ---------------------------------------------------
+in vec2 cc ;
+uniform sampler2D   inColor ;
+uniform float uThreshold, vThreshold ;
+uniform float thickness ;
+
+layout (location=0) out vec4 ocolor ;
+
+// macros ----------------------------------------------------------------
+
+#define ut  uThreshold
+#define vt  vThreshold
+
+#define u   color.r
+#define v   color.g
+
+#define noThetaDivs 20.
+
+/*========================================================================
+ * main body
+ *========================================================================
+ */
+void main(){
+    vec4 color = texture(inColor , cc ) ;
+    vec4 col ;
+
+    float f = (u>ut) ? 1. : -1. ;
+    float g = (v>vt) ? 1. : -1. ;
+    
+    float pi = acos(-1.) ;
+    vec2  dir ;
+    float theta ;
+
+    if (f<0. && g<0. ){
+        // search around the point to see if the point is in the region
+        // which requires stimulation
+        for(float i=0. ; i<noThetaDivs ;i+=1.){
+            theta = 2.*i*pi/noThetaDivs ;
+            dir = thickness*vec2(cos(theta),sin(theta)) ;
+            col = texture(inColor, cc + dir ) ;
+
+            if ( (((col.g>vt) ? 1. : -1.) *g) < 0. ){
+                u = 1. ;
+                break ;
+            }
+        }
+    }
+    
+    ocolor = vec4(color) ;
+    return ;
+}
+
+
+</script><!-- end of defib shader's source code -->
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- main script - JavaScript code                                     -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
 // get the shader source by its id .......................................
 function source(id){
     return document.getElementById(id).text ;
@@ -492,3 +833,7 @@ createGui() ;
 
 // execute run function to initiate simulation ...........................
 run() ;
+</script>
+
+</body>
+</html>

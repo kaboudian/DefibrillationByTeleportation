@@ -1909,8 +1909,22 @@ void main(){
     float f = (u>ut) ? 1. : 0. ;
     float g = (v<vt) ? 1. : 0. ;
 
-    ocolor = vec4(f,g,0.,1.) ;
+    if ( f>0.5 && g >0.5 ){
+        ocolor = vec4(vec3(96., 192., 240.)/255.,1.) ;
+        return ;
+    }
 
+    if ( f > 0.5 ){
+        ocolor = vec4(vec3(240., 72., 72.)/255.,1.) ;
+        return ;
+    }
+
+    if ( g >0.5 ){
+        ocolor =  vec4(vec3(240., 192., 72.)/255.,1.) ;
+        return ;
+    }
+
+    ocolor = vec4(vec3(255., 255., 240.)/255.,1.) ;
     return ;
 }
 
