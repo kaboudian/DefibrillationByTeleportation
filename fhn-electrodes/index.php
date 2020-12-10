@@ -35,12 +35,6 @@ canvas{
                     Your browser doesn't support HTML5.0
                 </canvas>
             </td>
-            <td>
-                <canvas id=canvas_5 width=512 height=512>
-                    Your browser doesn't support HTML5.0
-                </canvas>
-            </td>
-
         </tr>
         <tr>
             <td>
