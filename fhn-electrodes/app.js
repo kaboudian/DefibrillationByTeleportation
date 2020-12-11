@@ -519,6 +519,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
         
         refreshDisplay() ;
@@ -535,6 +536,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
         refreshDisplay() ;
     }

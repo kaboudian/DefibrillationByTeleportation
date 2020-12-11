@@ -76,6 +76,7 @@ function loadWebGL(){
         env.sinit.run() ;
 
         env.splot.init() ;
+        env.pplot.init() ;
         env.vsgn.init(0) ;
         env.osgn.init(0) ;
 
@@ -215,6 +216,7 @@ function loadWebGL(){
             env.vplot.setProbePosition(e.position) ;
             env.splot.setProbePosition(e.position) ;
             env.splot.init() ;
+            env.pplot.init() ;
             env.vplot.init() ;
         }
     } ) ;
@@ -229,6 +231,7 @@ function loadWebGL(){
             env.vplot.setProbePosition(e.position) ;
             env.splot.setProbePosition(e.position) ;
             env.splot.init() ;
+            env.pplot.init() ;
             env.vplot.init() ;
         }
     } ) ;
