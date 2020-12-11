@@ -12,9 +12,10 @@ precision highp int ;
 
 // interface variables ---------------------------------------------------
 in vec2 cc ;
-uniform sampler2D   inColor ;
+uniform sampler2D   inColor, itcolor ;
 uniform float uThreshold, vThreshold ;
 uniform float thickness ;
+uniform float radius, theta ;
 
 layout (location=0) out vec4 ocolor ;
 
@@ -41,19 +42,26 @@ void main(){
     
     float pi = acos(-1.) ;
     vec2  dir ;
-    float theta ;
+    float stheta ;
 
-    if (f<0. && g<0. ){
-        // search around the point to see if the point is in the region
-        // which requires stimulation
-        for(float i=0. ; i<noThetaDivs ;i+=1.){
-            theta = 2.*i*pi/noThetaDivs ;
-            dir = thickness*vec2(cos(theta),sin(theta)) ;
-            col = texture(inColor, cc + dir ) ;
+    vec4 tcolor = texture( itcolor, vec2(0.5) ) ;
 
-            if ( (((col.g>vt) ? 1. : -1.) *g) < 0. ){
-                u = 1. ;
-                break ;
+    bool teleporting = ( tcolor.r> 0.5  && tcolor.g<0.5 ) ;
+
+    if ( length( cc - vec2(0.5) ) < radius && teleporting ){
+        if (f<0. && g<0. ){
+            // search around the point to see if the point is in the region
+            // which requires stimulation
+            for(float i=0. ; i<noThetaDivs ;i+=1.){
+                stheta = 2.*i*pi/noThetaDivs ;
+                dir = 0.5*thickness*vec2(cos(stheta),sin(stheta)) ;
+                col = texture(inColor, cc + dir ) ;
+
+                if ( (((col.g>vt) ? 1. : -1.) *g) < 0. &&
+                        col.r<ut ){
+                    u = 1. ;
+                    break ;
+                }
             }
         }
     }

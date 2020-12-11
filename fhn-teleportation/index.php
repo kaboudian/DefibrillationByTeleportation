@@ -50,11 +50,14 @@
 
 <?php
     include "shader.php" ;
-    shader('init' ) ;
-    shader('march') ;
-    shader('click') ;
-    shader('2dPhaseMap') ;
-    shader('defib') ;
+    shader( 'init'          ) ;
+    shader( 'march'         ) ;
+    shader( 'click'         ) ;
+    shader( '2dPhaseMap'    ) ;
+    shader( 'init_teleport' ) ;
+    shader( 'check_teleport') ;
+    shader( 'teleported'    ) ;
+    shader( 'defib'         ) ;
 ?>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
