@@ -58,6 +58,8 @@
     shader( 'check_teleport') ;
     shader( 'teleported'    ) ;
     shader( 'defib'         ) ;
+    shader( 'tip_s1'        ) ;
+    shader( 'tip_s2'        ) ;
 ?>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->

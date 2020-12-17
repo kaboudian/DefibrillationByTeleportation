@@ -13,9 +13,11 @@ precision highp int ;
 // interface variables ---------------------------------------------------
 in vec2 cc ;
 uniform sampler2D   inColor, itcolor ;
-uniform float uThreshold, vThreshold ;
-uniform float thickness ;
-uniform float radius, theta ;
+uniform float       uThreshold, vThreshold ;
+uniform float       thickness ;
+uniform float       tx, ty ;
+
+uniform sampler2D   tip ;
 
 layout (location=0) out vec4 ocolor ;
 
@@ -48,7 +50,11 @@ void main(){
 
     bool teleporting = ( tcolor.r> 0.5  && tcolor.g<0.5 ) ;
 
-    if ( length( cc - vec2(0.5) ) < radius && teleporting ){
+
+    vec2    tippos = texture(tip, vec2(0.5) ).xy ;
+    vec2    dest = vec2(tx,ty);
+    float   dist = length(tippos-dest) ;
+    if ( length( cc - tippos ) <= dist && teleporting ){
         if (f<0. && g<0. ){
             // search around the point to see if the point is in the region
             // which requires stimulation

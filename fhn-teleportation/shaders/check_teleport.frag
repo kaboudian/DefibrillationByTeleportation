@@ -3,7 +3,7 @@ precision   highp float ;
 
 uniform float uThreshold, vThreshold ;
 uniform float thickness ;
-uniform float radius, theta ;
+uniform float tx, ty ;
 
 uniform sampler2D   itcolor ;
 uniform sampler2D   iscolor ;
@@ -23,7 +23,6 @@ out vec4 ocolor ;
 
 void main(){
     float pi    = acos(-1.) ;
-    float th    = pi*theta/180. ;
 
     vec4 tcolor = texture( itcolor, vec2(0.5) ) ;
     
@@ -32,17 +31,17 @@ void main(){
         return ;
     }
 
-    vec2 probe  = vec2(0.5)+radius*vec2(cos(th),sin(th)) ;
+    vec2 probe  = vec2(tx,ty)  ;
     
     vec4 col ;
     vec4 color = texture(iscolor , probe ) ;
-    float f = (u>ut) ? 1. : -1. ;
-    float g = (v>vt) ? 1. : -1. ;
+    bool f = (u>ut) ;
+    bool g = (v>vt) ;
     
     vec2  dir ;
     float stheta ;
 
-    if (f<0. && g<0. ){
+    if (!(f||g)){
         // search around the point to see if the point is in the region
         // which requires stimulation
         for(float i=0. ; i<noThetaDivs ;i+=1.){
@@ -50,7 +49,7 @@ void main(){
             dir = thickness*vec2(cos(stheta),sin(stheta)) ;
             col = texture(iscolor, probe + dir ) ;
 
-            if ( (((col.g>vt) ? 1. : -1.) *g) < 0. ){
+            if ((col.g>vt) && (col.r<ut) ){
                 tcolor.r = 1. ;
                 break ;
             }

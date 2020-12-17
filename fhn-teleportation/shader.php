@@ -1,4 +1,7 @@
 <?php
+
+$SHADER_DIR = __dir__ .  "/shaders" ;
+
 /*========================================================================
  * a function that creates a script section with the id of the file
  * and also reads the content file into the script section 
@@ -59,7 +62,7 @@ function getShader( $file ){
  */
 function shader($name){
     commentLine(65, "*") ;
-    $F = __dir__ . "/" . $name ;
+    $F = $GLOBALS['SHADER_DIR'] . "/" . $name ;
 
     //
     if ( file_exists( $F . ".frag" ) ){
