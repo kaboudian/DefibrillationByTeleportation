@@ -33,9 +33,9 @@ env.pacemakerY          = 0. ;
 env.pacemakerCircular   = true ;
 
 // defining the textures .................................................
-var fcolor = new Abubu.Float32Texture(512,512, 
+var fcolor = new Abubu.Float32Texture(env.width,env.height ,
     { pairable : true } ) ;
-var scolor = new Abubu.Float32Texture(512,512 ) ;
+var scolor = new Abubu.Float32Texture(env.width,env.height ) ;
 scolor.pairable = true ;
 
 // Setup a solver ........................................................
