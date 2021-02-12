@@ -33,9 +33,9 @@ env.pacemakerY          = 0. ;
 env.pacemakerCircular   = true ;
 
 // defining the textures .................................................
-var fcolor = new Abubu.Float32Texture(512,512, 
+var fcolor = new Abubu.Float32Texture(env.width,env.height ,
     { pairable : true } ) ;
-var scolor = new Abubu.Float32Texture(512,512 ) ;
+var scolor = new Abubu.Float32Texture(env.width,env.height ) ;
 scolor.pairable = true ;
 
 // Setup a solver ........................................................
@@ -84,18 +84,94 @@ var smarch = new Abubu.Solver({
         }
     } ) ;
 
-// defibriliate ----------------------------------------------------------
+// tip -------------------------------------------------------------------
 env.defib = {} ;
-env.thickness  = 0.05 ;
+env.thickness  = 0.06 ;
 env.uThreshold = 0.3
 env.vThreshold = 0.07 ;
+
+env.tx = 0.7 ;
+env.ty  = 0.5 ;
+env.teleporting = false ;
+
+
+var tip_1 = new Abubu.Float32Texture( env.width, 1 ) ;
+var tip = new Abubu.Float32Texture( 1 , 1 ) ;
+
+var tip_s1 = new Abubu.Solver({
+    fragmentShader : source( 'tip_s1' ),
+    uniforms : {
+       inColor : { type : 't', value : fcolor } ,
+       uThreshold : { type : 'f', value : env.uThreshold } ,
+       vThreshold : { type : 'f', value : env.vThreshold } ,
+    } , 
+    targets : { 
+        ocolor : { location : 0, target : tip_1 }, 
+    }
+} ) ;
+
+var tip_s2 = new Abubu.Solver({
+    fragmentShader : source( 'tip_s2' ), 
+    uniforms : {
+        inColor : { type : 't', value : tip_1 } ,
+    } ,
+    targets : {
+        ocolor : { location : 0 , target : tip } ,
+    }
+} ) ;
+
+// defibriliate ----------------------------------------------------------
+
+
+var ftcolor = new Abubu.Float32Texture( 1,1, { pairable : true } ) ;
+var stcolor = new Abubu.Float32Texture( 1,1, { pairable : true } ) ;
+
+var tinit = new Abubu.Solver({
+    fragmentShader : source('init_teleport') ,
+    targets : {
+        ocolor0 : { location :0, target : ftcolor } ,
+        ocolor1 : { location :1, target : stcolor } ,
+    }
+} ) ;
+
+var checkTeleport = new Abubu.Solver({
+    fragmentShader : source('check_teleport') ,
+    uniforms : { 
+        itcolor     : { type : 't', value : ftcolor         } ,
+        iscolor     : { type : 't', value : fcolor          } ,
+        thickness   : { type : 'f', value : env.thickness   } ,
+        uThreshold  : { type : 'f', value : env.uThreshold  } ,
+        vThreshold  : { type : 'f', value : env.vThreshold  } ,
+        tx      : { type : 'f', value : env.tx      } ,
+        ty       : { type : 'f', value : env.ty       } ,
+    }, 
+    targets: {
+        ocolor : { location : 0, target : stcolor } ,
+    }
+} ) ;
+
+var teleported = new Abubu.Solver({
+    fragmentShader : source('teleported') ,
+    uniforms: {
+        icolor : { type : 't', value : stcolor } ,
+    } ,
+    targets : {
+        ocolor : {location :0 , target : ftcolor } ,
+    }
+}) ;
+
+
 var defib_s1 = new Abubu.Solver({
     fragmentShader : source('defib') ,
     uniforms :{
         inColor : { type : 's', value : fcolor, magFilter: 'linear' } ,
+        itcolor : { type : 't', value : stcolor } ,
         thickness  : { type : 'f', value : env.thickness   } ,
         uThreshold : { type : 'f', value : env.uThreshold  } ,
         vThreshold : { type : 'f', value : env.vThreshold  } ,
+        tx      : { type : 'f', value : env.tx      } ,
+        ty       : { type : 'f', value : env.ty       } ,
+        tip         : { type : 't', value : tip } ,
     } ,
     targets : {
         ocolor : { location : 0 , target : scolor } ,
@@ -103,9 +179,19 @@ var defib_s1 = new Abubu.Solver({
 } ) ;
 
 var defib_s2 = new Abubu.Copy(scolor, fcolor) ;
-env.defibrillate = function(){
+
+env.teleporter = function(){
+    checkTeleport.render() ;
+    tip_s1.render() ;
+    tip_s2.render() ;
+
     defib_s1.render() ;
     defib_s2.render() ;
+    teleported.render() ;
+}
+env.teleport = function(){
+    env.teleporting = true ;
+    tinit.render() ;
 }
 
 // march the solution for two time steps ---------------------------------
@@ -154,10 +240,13 @@ uplot.render() ;
 var thresholdPlot = new Abubu.Solver({
     fragmentShader : source("2dPhaseMap") ,
     uniforms : {
-        inColor : { type : 't', value : fcolor } ,
-        thickness  : { type : 'f', value : env.thickness   } ,
-        uThreshold : { type : 'f', value : env.uThreshold  } ,
-        vThreshold : { type : 'f', value : env.vThreshold  } ,
+        inColor     : { type : 't', value : fcolor          } ,
+        thickness   : { type : 'f', value : env.thickness   } ,
+        tx      : { type : 'f', value : env.tx      } ,
+        ty       : { type : 'f', value : env.ty       } ,
+        tip         : { type : 't', value : tip             } ,
+        uThreshold  : { type : 'f', value : env.uThreshold  } ,
+        vThreshold  : { type : 'f', value : env.vThreshold  } ,
     } ,
     canvas : canvas_2 
 } ) ;
@@ -258,8 +347,8 @@ function refreshDisplay(){
 env.initialize = function(){
     env.time = 0 ;
     init.render() ;
-    splot.init() ;
     pplot.init() ;
+    splot.init() ;
     env.usgn.init(0) ;
     env.vsgn.init(0) ;
     uplot.init() ;
@@ -271,9 +360,16 @@ function run(){
         for(var i = 0 ; i<env.skip ; i++){
             march() ;
             updateSignals() ;
+            if ( env.teleporting ){
+                env.teleporter() ;
+            }
         }
+        if ( ftcolor.value[0] >0.5){
+            env.teleporting = false ;
+        }
+        refreshDisplay() ;
+
     }
-    refreshDisplay() ;
     requestAnimationFrame(run) ;
 }
 
@@ -430,7 +526,6 @@ function addToGui(
         var param = paramList[i] ;
         elements[param] = guiElemenent.add(obj, param )  ;
         elements[param].onChange(function(){
-            console.log(this) ;
             Abubu.setUniformInSolvers( 
                     this.property , // this refers to the GUI element 
                     this.object[this.property] , 
@@ -482,7 +577,10 @@ function createGui(){
     clk.elements.clickRadius.step(0.01) ;
 
     // defibrilation -----------------------------------------------------
-    var dfb = panel.addFolder("Defibrillation") ;
+    var dfb = panel.addFolder("Teleportation") ;
+    dfb.probe = addToGui( dfb, env, 
+            [ 'tx', 'ty' ] , 
+            [thresholdPlot,checkTeleport, defib_s1]) ;
     dfb.elements = addToGui( dfb, env, 
         [
             "thickness" ,
@@ -490,7 +588,9 @@ function createGui(){
             "vThreshold" 
         ] , [ defib_s1, thresholdPlot ] ) ;
    
-    dfb.add(env,'defibrillate') ;
+    dfb.add(env,'teleport') ;
+    dfb.add(env,'teleporting').listen() ;
+    dfb.open() ;
     // csv files ---------------------------------------------------------
     var csv = panel.addFolder('Save and Load CSV') ;
     csv.add(env,'csvFileName' ) ;
@@ -509,5 +609,6 @@ function createGui(){
 // execute createGui to create the graphical user interface ..............
 createGui() ;
 
+refreshDisplay() ;
 // execute run function to initiate simulation ...........................
 run() ;

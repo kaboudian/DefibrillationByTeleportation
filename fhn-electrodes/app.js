@@ -203,6 +203,7 @@ class ElectrodeDefibrilator{
         this.activeElectrodes.width = this.mx ;
         this.electrodeCoordinates.width = this.mx ;
         this.step2.uniforms.mx.value = this.mx ;
+        this.coordinator.render() ;
     }
 
     // mty ...............................................................
@@ -214,6 +215,7 @@ class ElectrodeDefibrilator{
         this.activeElectrodes.height = this.my ;
         this.electrodeCoordinates.height = this.my ;
         this.step2.uniforms.my.value = this.my ;
+        this.coordinator.render() ;
     }
 
     // electrodeSize .....................................................
@@ -268,12 +270,16 @@ class ElectrodeDefibrilator{
     }
 }
 
-env.defib = new ElectrodeDefibrilator({
-    mx : 16 , my :16 , fcolor : fcolor, scolor : scolor } ) ;
-
-env.thickness  = 0.03 ;
 env.uThreshold = 0.3
 env.vThreshold = 0.07 ;
+
+env.defib = new ElectrodeDefibrilator({
+    mx : 16 , my :16 , fcolor : fcolor, scolor : scolor,
+    thickness : 0.02 , electrodeSize : 0.03, 
+    uThreshold : env.uThreshold, 
+    vThreshold : env.vThreshold,
+} ) ;
+
 env.defibrillate = function(){
     env.defib.run() ;
     refreshDisplay() ;
@@ -437,7 +443,7 @@ env.initialize = function(){
 }
 
 // solution and visualization sequence ...................................
-env.alwaysRefresh = false ;
+env.alwaysRefresh = true ;
 function run(){
     if (env.running){
         for(var i = 0 ; i<env.skip ; i++){
@@ -513,6 +519,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
         
         refreshDisplay() ;
@@ -529,6 +536,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
         refreshDisplay() ;
     }
@@ -607,7 +615,6 @@ function addToGui(
         var param = paramList[i] ;
         elements[param] = guiElemenent.add(obj, param )  ;
         elements[param].onChange(function(){
-            console.log(this) ;
             Abubu.setUniformInSolvers( 
                     this.property , // this refers to the GUI element 
                     this.object[this.property] , 

@@ -35,12 +35,6 @@ canvas{
                     Your browser doesn't support HTML5.0
                 </canvas>
             </td>
-            <td>
-                <canvas id=canvas_5 width=512 height=512>
-                    Your browser doesn't support HTML5.0
-                </canvas>
-            </td>
-
         </tr>
         <tr>
             <td>
@@ -694,6 +688,7 @@ class ElectrodeDefibrilator{
         this.activeElectrodes.width = this.mx ;
         this.electrodeCoordinates.width = this.mx ;
         this.step2.uniforms.mx.value = this.mx ;
+        this.coordinator.render() ;
     }
 
     // mty ...............................................................
@@ -705,6 +700,7 @@ class ElectrodeDefibrilator{
         this.activeElectrodes.height = this.my ;
         this.electrodeCoordinates.height = this.my ;
         this.step2.uniforms.my.value = this.my ;
+        this.coordinator.render() ;
     }
 
     // electrodeSize .....................................................
@@ -759,12 +755,16 @@ class ElectrodeDefibrilator{
     }
 }
 
-env.defib = new ElectrodeDefibrilator({
-    mx : 16 , my :16 , fcolor : fcolor, scolor : scolor } ) ;
-
-env.thickness  = 0.03 ;
 env.uThreshold = 0.3
 env.vThreshold = 0.07 ;
+
+env.defib = new ElectrodeDefibrilator({
+    mx : 16 , my :16 , fcolor : fcolor, scolor : scolor,
+    thickness : 0.02 , electrodeSize : 0.03, 
+    uThreshold : env.uThreshold, 
+    vThreshold : env.vThreshold,
+} ) ;
+
 env.defibrillate = function(){
     env.defib.run() ;
     refreshDisplay() ;
@@ -928,7 +928,7 @@ env.initialize = function(){
 }
 
 // solution and visualization sequence ...................................
-env.alwaysRefresh = false ;
+env.alwaysRefresh = true ;
 function run(){
     if (env.running){
         for(var i = 0 ; i<env.skip ; i++){
@@ -1004,6 +1004,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
         
         refreshDisplay() ;
@@ -1020,6 +1021,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
         refreshDisplay() ;
     }
@@ -1098,7 +1100,6 @@ function addToGui(
         var param = paramList[i] ;
         elements[param] = guiElemenent.add(obj, param )  ;
         elements[param].onChange(function(){
-            console.log(this) ;
             Abubu.setUniformInSolvers( 
                     this.property , // this refers to the GUI element 
                     this.object[this.property] , 
@@ -1151,14 +1152,17 @@ function createGui(){
 
     // defibrilation -----------------------------------------------------
     var dfb = panel.addFolder("Defibrillation") ;
-    dfb.elements = addToGui( dfb, env, 
+    dfb.elements = addToGui( dfb, env.defib, 
         [
+            "mx",
+            "my",
+            "electrodeSize" ,
             "thickness" ,
             "uThreshold" ,
             "vThreshold" 
-        ] , [ defib_s1, thresholdPlot ] ) ;
+        ] , [] ) ;
    
-    dfb.add(env,'defibrillate') ;
+    dfb.add(env.defib,'defibrillate') ;
     dfb.open() ;
     // csv files ---------------------------------------------------------
     var csv = panel.addFolder('Save and Load CSV') ;

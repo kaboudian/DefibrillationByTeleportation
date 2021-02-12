@@ -612,8 +612,8 @@ function refreshDisplay(){
 env.initialize = function(){
     env.time = 0 ;
     init.render() ;
-    env.phaseInit.render() ;
     splot.init() ;
+    pplot.init() ;
     env.usgn.init(0) ;
     env.vsgn.init(0) ;
     uplot.init() ;
@@ -691,6 +691,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
     }
 } ) ;
@@ -705,6 +706,7 @@ var setProbe = new Abubu.MouseListener({
         uplot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
+        pplot.init() ;
         uplot.init() ;
     }
 } ) ;

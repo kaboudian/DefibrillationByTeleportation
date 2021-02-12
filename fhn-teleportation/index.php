@@ -9,13 +9,7 @@
 	    type='text/javascript'></script>
 
     <link rel="stylesheet" type="text/css" href="abubu_app.css">
-<style>
-canvas{
-    border-style: solid ;
-    border-width: 1px ;
-    border-color: black ;
-}
-</style>
+
 </head>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -56,15 +50,16 @@ canvas{
 
 <?php
     include "shader.php" ;
-    shader('init' ) ;
-    shader('march') ;
-    shader('click') ;
-    shader('2dPhaseMap') ;
-    shader('defib_s1') ;
-    shader('defib_s2') ;
-    shader('defib_s3') ;
-    shader('active') ;
-    shader('coordinator') ;
+    shader( 'init'          ) ;
+    shader( 'march'         ) ;
+    shader( 'click'         ) ;
+    shader( '2dPhaseMap'    ) ;
+    shader( 'init_teleport' ) ;
+    shader( 'check_teleport') ;
+    shader( 'teleported'    ) ;
+    shader( 'defib'         ) ;
+    shader( 'tip_s1'        ) ;
+    shader( 'tip_s2'        ) ;
 ?>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
