@@ -2,7 +2,7 @@ all : index.html
 
 index.html : index.php
 	php index.php > $@
-	cp -r $@ fhn.html
+	cp -r $@ fhn-teleportation.html
 
 .PHONY: index.html
 

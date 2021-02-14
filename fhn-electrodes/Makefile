@@ -2,7 +2,7 @@ all : index.html
 
 index.html : index.php
 	php index.php > $@
-	cp -r $@ fhn.html
+	cp -r $@ fhn-electrodes.html
 
 .PHONY: index.html
 

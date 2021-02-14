@@ -67,9 +67,18 @@ in vec2 cc, pixPos ;
 layout (location = 0) out vec4 color1 ;
 layout (location = 1) out vec4 color2 ;
 
+#define inreg(a,b)  ( (cc.y<0.53) && (cc.x >(a)) && (cc.x<(b)) )
+
 void main() {
     vec4 color = vec4(0.) ;
     
+    if (inreg(0.5,0.55) ){
+        color.r = 1. ;
+    }
+    if (inreg(0.5,0.525)){
+        color.g = .17 ;
+    }
+
     color1 = color ;
     color2 = color ;
     return ;
@@ -234,11 +243,11 @@ precision highp int ;
 
 // interface variables ---------------------------------------------------
 in vec2 cc ;
-uniform sampler2D   inColor ;
+uniform sampler2D   inColor , tip ;
 uniform float       uThreshold, vThreshold ;
 uniform float       thickness ;
 
-uniform float       radius, theta ;
+uniform float       tx, ty ;
 
 layout (location=0) out vec4 ocolor ;
 
@@ -249,6 +258,8 @@ layout (location=0) out vec4 ocolor ;
 #define u   color.r
 #define v   color.g
 
+#define noThetaDivs 20.
+
 /*========================================================================
  * main body 
  *========================================================================
@@ -256,29 +267,29 @@ layout (location=0) out vec4 ocolor ;
 void main(){
     vec4 color = texture(inColor , cc ) ;
 
-    float f = (u>ut) ? 1. : 0. ;
-    float g = (v>vt) ? 1. : 0. ;
+    bool f = (u>ut)  ;
+    bool g = (v>vt)  ;
 
-    if ( f>0.5 && g >0.5 ){
+    if ( f && g  ){
         ocolor = vec4(vec3(96., 192., 240.)/255.,1.) ;
-    }else if ( f > 0.5 ){
+    }else if ( f ){
         ocolor = vec4(vec3(240., 72., 72.)/255.,1.) ;
-    }else if ( g >0.5 ){
+    }else if ( g ){
         ocolor =  vec4(vec3(240., 192., 72.)/255.,1.) ;
     }else{
         ocolor = vec4(vec3(255., 255., 240.)/255.,1.) ;
     }
 
-    if ( abs(length(cc-vec2(0.5))-radius)<0.01 ){
-        ocolor = mix( ocolor , vec4(0.,1.,0.,1.),0.2 ) ;
-    }
+  //  if ( abs(length(cc-vec2(0.5))-radius)<0.01 ){
+  //      ocolor = mix( ocolor , vec4(0.,1.,0.,1.),0.2 ) ;
+  //  }
 
-    float th = theta*acos(-1.)/180. ; 
-    vec2 probe = vec2(0.5,0.5) + radius*vec2(cos(th),sin(th)) ;
+    vec2 probe = vec2(tx,ty) ;
 
-    if ( length( cc-probe )< 0.02 ){
+    if ( length( cc-probe )< 0.1 ){
         ocolor = mix( ocolor, vec4(1.,0.,0.,1.) ,0.3) ;
     }
+
     return ;
 }
 
@@ -304,7 +315,7 @@ precision   highp float ;
 
 uniform float uThreshold, vThreshold ;
 uniform float thickness ;
-uniform float radius, theta ;
+uniform float tx, ty ;
 
 uniform sampler2D   itcolor ;
 uniform sampler2D   iscolor ;
@@ -324,7 +335,6 @@ out vec4 ocolor ;
 
 void main(){
     float pi    = acos(-1.) ;
-    float th    = pi*theta/180. ;
 
     vec4 tcolor = texture( itcolor, vec2(0.5) ) ;
     
@@ -333,17 +343,17 @@ void main(){
         return ;
     }
 
-    vec2 probe  = vec2(0.5)+radius*vec2(cos(th),sin(th)) ;
+    vec2 probe  = vec2(tx,ty)  ;
     
     vec4 col ;
     vec4 color = texture(iscolor , probe ) ;
-    float f = (u>ut) ? 1. : -1. ;
-    float g = (v>vt) ? 1. : -1. ;
+    bool f = (u>ut) ;
+    bool g = (v>vt) ;
     
     vec2  dir ;
     float stheta ;
 
-    if (f<0. && g<0. ){
+    if (!(f||g)){
         // search around the point to see if the point is in the region
         // which requires stimulation
         for(float i=0. ; i<noThetaDivs ;i+=1.){
@@ -351,7 +361,7 @@ void main(){
             dir = thickness*vec2(cos(stheta),sin(stheta)) ;
             col = texture(iscolor, probe + dir ) ;
 
-            if ( (((col.g>vt) ? 1. : -1.) *g) < 0. ){
+            if ((col.g>vt) && (col.r<ut) ){
                 tcolor.r = 1. ;
                 break ;
             }
@@ -402,9 +412,11 @@ precision highp int ;
 // interface variables ---------------------------------------------------
 in vec2 cc ;
 uniform sampler2D   inColor, itcolor ;
-uniform float uThreshold, vThreshold ;
-uniform float thickness ;
-uniform float radius, theta ;
+uniform float       uThreshold, vThreshold ;
+uniform float       thickness ;
+uniform float       tx, ty ;
+
+uniform sampler2D   tip ;
 
 layout (location=0) out vec4 ocolor ;
 
@@ -437,7 +449,11 @@ void main(){
 
     bool teleporting = ( tcolor.r> 0.5  && tcolor.g<0.5 ) ;
 
-    if ( length( cc - vec2(0.5) ) < radius && teleporting ){
+
+    vec2    tippos = texture(tip, vec2(0.5) ).xy ;
+    vec2    dest = vec2(tx,ty);
+    float   dist = length(tippos-dest) ;
+    if ( length( cc - tippos ) <= dist && teleporting ){
         if (f<0. && g<0. ){
             // search around the point to see if the point is in the region
             // which requires stimulation
@@ -461,6 +477,133 @@ void main(){
 
 
 </script><!-- end of defib shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='tip_s1' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * tip_s1.frag  :   First step of reduction to look for the spiral tip
+ *                  Column-wise reduction to create a row of pixels
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Thu 17 Dec 2020 17:21:31 (EST)
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+precision highp int ;
+precision highp float ;
+
+in vec2 cc ;
+uniform sampler2D   inColor ;
+uniform float       uThreshold, vThreshold ;
+
+layout (location=0) out vec4 ocolor ;
+
+// macros ----------------------------------------------------------------
+#define ut  uThreshold
+#define vt  vThreshold
+
+#define u   color.r
+#define v   color.g
+
+/*========================================================================
+ * main body of the shader
+ *========================================================================
+ */
+void main(){
+    vec4 color ;
+    bool f,g  ;
+
+    ivec2 size = textureSize( inColor, 0 ) ;
+    vec2  s = vec2(1.)/vec2(size) ;
+
+    vec2 pos ;
+    vec2 p ;
+
+    bool r1, r2, r3, r4 ;
+
+    // reduction in y-direction
+    for( int jc = 0 ; jc< size.y ; jc++){
+        pos = vec2( cc.x, (float(jc)+0.5)*s.y ) ; 
+        r1 = false ;
+        r2 = false ;
+        r3 = false ;
+        r4 = false ;
+
+        // look around the point and tick each region that exists 
+        for( int i= -2 ; i <3 ; i+=1 ){
+            for( int j= -2 ; j <3 ; j+=1 ){
+                p = pos + vec2(i,j)*s  ;
+                color = texture(inColor, p) ;
+                f = (u>ut) ;
+                g = (v>vt) ;
+               
+                if ( f && g ){
+                    r1 = true ;
+                }else if ( f ){
+                    r2 = true ;
+                }else if ( g ){
+                    r3 = true ;
+                }else{
+                    r4 = true ;
+                }
+            }
+        }
+        // chek if all four regions are present around p ;
+        if ( r1 && r2 && r3 && r4 ){
+            ocolor = vec4(pos.xy, 0.,0.) ;
+            return ;
+        }
+    }
+
+    ocolor = vec4(0.) ;
+
+    return ;
+}
+
+
+</script><!-- end of tip_s1 shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='tip_s2' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * tip_s2.frag  :   Second step of reduction to look for the spiral tip
+ *                  Row-wise reduction to create a single pixel 
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Thu 17 Dec 2020 17:21:31 (EST)
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp int ;
+precision highp float ;
+
+in vec2 cc ;
+uniform sampler2D   inColor ;
+layout (location=0) out vec4 ocolor ;
+
+void main(){
+    ivec2 size = textureSize( inColor, 0 ) ;
+    float sx = 1./float(size.x) ;
+
+    vec4 color = vec4(0.) ;
+    vec2 p ;
+
+    for (int i=0 ; i < size.x ; i++ ){
+        p = vec2((float(i)+0.5)*sx,0.5) ;
+        color += texture( inColor, p) ;
+
+        if ( color.r > 0. || color.g >0.){
+            break ;
+        }
+    }
+
+    ocolor = vec4(color) ;
+    return ;
+}
+
+
+</script><!-- end of tip_s2 shader's source code -->
 
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -502,9 +645,9 @@ env.pacemakerY          = 0. ;
 env.pacemakerCircular   = true ;
 
 // defining the textures .................................................
-var fcolor = new Abubu.Float32Texture(512,512, 
+var fcolor = new Abubu.Float32Texture(env.width,env.height ,
     { pairable : true } ) ;
-var scolor = new Abubu.Float32Texture(512,512 ) ;
+var scolor = new Abubu.Float32Texture(env.width,env.height ) ;
 scolor.pairable = true ;
 
 // Setup a solver ........................................................
@@ -553,15 +696,43 @@ var smarch = new Abubu.Solver({
         }
     } ) ;
 
-// defibriliate ----------------------------------------------------------
+// tip -------------------------------------------------------------------
 env.defib = {} ;
-env.thickness  = 0.05 ;
+env.thickness  = 0.06 ;
 env.uThreshold = 0.3
 env.vThreshold = 0.07 ;
 
-env.radius = 0.2 ;
-env.theta  = 0 ;
+env.tx = 0.7 ;
+env.ty  = 0.5 ;
 env.teleporting = false ;
+
+
+var tip_1 = new Abubu.Float32Texture( env.width, 1 ) ;
+var tip = new Abubu.Float32Texture( 1 , 1 ) ;
+
+var tip_s1 = new Abubu.Solver({
+    fragmentShader : source( 'tip_s1' ),
+    uniforms : {
+       inColor : { type : 't', value : fcolor } ,
+       uThreshold : { type : 'f', value : env.uThreshold } ,
+       vThreshold : { type : 'f', value : env.vThreshold } ,
+    } , 
+    targets : { 
+        ocolor : { location : 0, target : tip_1 }, 
+    }
+} ) ;
+
+var tip_s2 = new Abubu.Solver({
+    fragmentShader : source( 'tip_s2' ), 
+    uniforms : {
+        inColor : { type : 't', value : tip_1 } ,
+    } ,
+    targets : {
+        ocolor : { location : 0 , target : tip } ,
+    }
+} ) ;
+
+// defibriliate ----------------------------------------------------------
 
 
 var ftcolor = new Abubu.Float32Texture( 1,1, { pairable : true } ) ;
@@ -583,8 +754,8 @@ var checkTeleport = new Abubu.Solver({
         thickness   : { type : 'f', value : env.thickness   } ,
         uThreshold  : { type : 'f', value : env.uThreshold  } ,
         vThreshold  : { type : 'f', value : env.vThreshold  } ,
-        radius      : { type : 'f', value : env.radius      } ,
-        theta       : { type : 'f', value : env.theta       } ,
+        tx      : { type : 'f', value : env.tx      } ,
+        ty       : { type : 'f', value : env.ty       } ,
     }, 
     targets: {
         ocolor : { location : 0, target : stcolor } ,
@@ -610,8 +781,9 @@ var defib_s1 = new Abubu.Solver({
         thickness  : { type : 'f', value : env.thickness   } ,
         uThreshold : { type : 'f', value : env.uThreshold  } ,
         vThreshold : { type : 'f', value : env.vThreshold  } ,
-        radius      : { type : 'f', value : env.radius      } ,
-        theta       : { type : 'f', value : env.theta       } ,
+        tx      : { type : 'f', value : env.tx      } ,
+        ty       : { type : 'f', value : env.ty       } ,
+        tip         : { type : 't', value : tip } ,
     } ,
     targets : {
         ocolor : { location : 0 , target : scolor } ,
@@ -620,14 +792,17 @@ var defib_s1 = new Abubu.Solver({
 
 var defib_s2 = new Abubu.Copy(scolor, fcolor) ;
 
-env.teleport = function(){
+env.teleporter = function(){
     checkTeleport.render() ;
+    tip_s1.render() ;
+    tip_s2.render() ;
+
     defib_s1.render() ;
     defib_s2.render() ;
     teleported.render() ;
 }
-env.defibrillate = function(){
-    env. teleporting = true ;
+env.teleport = function(){
+    env.teleporting = true ;
     tinit.render() ;
 }
 
@@ -679,8 +854,9 @@ var thresholdPlot = new Abubu.Solver({
     uniforms : {
         inColor     : { type : 't', value : fcolor          } ,
         thickness   : { type : 'f', value : env.thickness   } ,
-        radius      : { type : 'f', value : env.radius      } ,
-        theta       : { type : 'f', value : env.theta       } ,
+        tx      : { type : 'f', value : env.tx      } ,
+        ty       : { type : 'f', value : env.ty       } ,
+        tip         : { type : 't', value : tip             } ,
         uThreshold  : { type : 'f', value : env.uThreshold  } ,
         vThreshold  : { type : 'f', value : env.vThreshold  } ,
     } ,
@@ -797,15 +973,15 @@ function run(){
             march() ;
             updateSignals() ;
             if ( env.teleporting ){
-                env.teleport() ;
+                env.teleporter() ;
             }
         }
         if ( ftcolor.value[0] >0.5){
             env.teleporting = false ;
         }
+        refreshDisplay() ;
 
     }
-    refreshDisplay() ;
     requestAnimationFrame(run) ;
 }
 
@@ -962,7 +1138,6 @@ function addToGui(
         var param = paramList[i] ;
         elements[param] = guiElemenent.add(obj, param )  ;
         elements[param].onChange(function(){
-            console.log(this) ;
             Abubu.setUniformInSolvers( 
                     this.property , // this refers to the GUI element 
                     this.object[this.property] , 
@@ -1016,8 +1191,8 @@ function createGui(){
     // defibrilation -----------------------------------------------------
     var dfb = panel.addFolder("Teleportation") ;
     dfb.probe = addToGui( dfb, env, 
-            [ 'radius', 'theta' ] , 
-            [thresholdPlot]) ;
+            [ 'tx', 'ty' ] , 
+            [thresholdPlot,checkTeleport, defib_s1]) ;
     dfb.elements = addToGui( dfb, env, 
         [
             "thickness" ,
@@ -1025,7 +1200,7 @@ function createGui(){
             "vThreshold" 
         ] , [ defib_s1, thresholdPlot ] ) ;
    
-    dfb.add(env,'defibrillate') ;
+    dfb.add(env,'teleport') ;
     dfb.add(env,'teleporting').listen() ;
     dfb.open() ;
     // csv files ---------------------------------------------------------
@@ -1046,6 +1221,7 @@ function createGui(){
 // execute createGui to create the graphical user interface ..............
 createGui() ;
 
+refreshDisplay() ;
 // execute run function to initiate simulation ...........................
 run() ;
 </script>

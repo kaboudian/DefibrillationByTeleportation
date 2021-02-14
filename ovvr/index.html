@@ -2165,6 +2165,8 @@ function loadWebGL(){
         env[name] = 1. ;
     }
 
+    env.C_Na = 1. ;
+    env['C_Na'] = 1. ;
     // Common uniforms for comp1 & comp2 solvers .........................
     class CompUniforms{
         constructor( obj, floats, ints){
@@ -2255,11 +2257,11 @@ function loadWebGL(){
             clickPosition   : { type : 'v2', value : [0.5,0.5]      } ,
         } ,
         targets : {
-            ocolor : { location : 0 , target : env.scolor1 } ,
+            ocolor : { location : 0 , target : env.scolor4 } ,
         }
     } ) ;
     
-    var clickCopy = new Abubu.Copy( env.scolor1, env.fcolor4 ) ;
+    var clickCopy = new Abubu.Copy( env.scolor4, env.fcolor4 ) ;
     
     var mouseDrag_1 = new Abubu.MouseListener({
         canvas : document.getElementById('canvas_1') ,
