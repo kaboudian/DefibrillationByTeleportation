@@ -17,29 +17,45 @@ a:hover {
 a:active {
     	color: blue;
 }
-/*
+
+* {
+    	max-width: 750px ;
+}
 li{
     	margin : 10px 6px ;
-} */
+}
 
 body {
 	counter-reset: h1;
 }
 
+h2:before{
+	counter-increment: h2;
+	content : counter(h2) ".\0000a0\0000a0";
+}
+
+h3:before {
+        counter-increment: h3;
+        content: counter(h2) "." counter(h3) ".\0000a0\0000a0";
+}
+h4:before{
+	content: counter(h2) "." counter(h3) "." counter(h4) ".\0000a0\0000a0";
+	counter-increment : h4;
+}
 
 h1{
-        max-width: 1024px ;
-	text-align:left;
+	counter-reset: h2;
+	text-align:center;
 	color: white;
        	background-color: #00254c;
-       	padding-left: 20px ;
-       	padding-top: 10px ;
-       	padding-bottom: 10px ;
+       	padding-left: 0px ;
+       	padding-top: 5px ;
+       	padding-bottom: 5px ;
        	border-radius: 10px;
 }
 
 h2 {
-        max-width: 1024px ;
+    	counter-reset:h3 ;
     	color: #00254c;
     	background-color: #e5e5e5 ;
     	padding-left: 20px ;
@@ -50,7 +66,7 @@ h2 {
 }
 
 h3 {
-        max-width: 1024px ;
+    	counter-reset:h4 ;
     	color: #00254c;
     	background-color: #f0f0f0 ;
     	padding-left: 20px ;
@@ -60,7 +76,7 @@ h3 {
 }
 
 h4 {
-        max-width: 1024px ;
+    	counter-reset: h5
     	color: #00254c;
     	background-color: #fafafa ;
     	padding-left: 20px ;
@@ -69,24 +85,8 @@ h4 {
     	border-radius: 10px;
 }
 
-p{
-    max-width : 700px  ;
-    padding-left: 10px ;
-}
-canvas.clickable:hover{
-    cursor:pointer ;
-    cursor:hand ;
-}
-
-.footer{
-    position : fixed ; 
-    max-width: 1024px ;
-    border-radius:10px ;
-    left : 0px ;
-    width : 100% ;
-    background-color: #fafafa;
-    color:black ;
-    bottom: 0px ;
-    text-align : left ;
-    font: 'italic 12pt Times' ;
+.center{
+    	display: block;
+    	margin-left: auto;
+    	margin-right: auto;
 }

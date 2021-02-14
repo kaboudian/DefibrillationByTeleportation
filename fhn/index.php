@@ -7,8 +7,12 @@
 
     <script src='https://abubujs.org/libs/Abubu.latest.js' 
 	    type='text/javascript'></script>
-
-    <link rel="stylesheet" type="text/css" href="abubu_app.css">
+<style>
+<?php
+  echo file_get_contents( __dir__ . "/../abubu_app.css" ) ;
+  
+?>
+</style>
 
 </head>
 
