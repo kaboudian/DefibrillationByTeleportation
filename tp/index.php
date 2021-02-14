@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-    <script src='http://abubujs.org/libs/Abubu.latest.js' 
+    <script src='https://abubujs.org/libs/Abubu.latest.js' 
 	    type='text/javascript'></script>
 
     <link rel="stylesheet" type="text/css" href="abubu_app.css">
